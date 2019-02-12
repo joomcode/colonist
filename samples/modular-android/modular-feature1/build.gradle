@@ -1,0 +1,29 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion androidCompileSdkVersion
+  buildToolsVersion androidBuildToolsVersion
+
+  defaultConfig {
+    minSdkVersion androidMinSdkVersion
+    targetSdkVersion androidTargetSdkVersion
+    versionCode 1
+    versionName version
+
+    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+  }
+}
+
+dependencies {
+  implementation project(':samples:modular-android:modular-api')
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+
+  androidTestImplementation "androidx.test:runner:$testRunnerVersion"
+  androidTestImplementation "androidx.test:rules:$testRulesVersion"
+  androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+  androidTestImplementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+
+  testImplementation "junit:junit:$junitVersion"
+}

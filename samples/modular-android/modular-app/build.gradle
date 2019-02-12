@@ -1,0 +1,35 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'io.michaelrocks.colonist.android'
+
+android {
+  compileSdkVersion androidCompileSdkVersion
+  buildToolsVersion androidBuildToolsVersion
+
+  defaultConfig {
+    applicationId 'io.michaelrocks.colonist.modular'
+    minSdkVersion androidMinSdkVersion
+    targetSdkVersion androidTargetSdkVersion
+    versionCode 1
+    versionName version
+
+    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+  }
+}
+
+dependencies {
+  def featuresString = project.properties['enabledFeatures']?.toString() ?: ""
+  def features = featuresString.tokenize(",")
+
+  implementation project(':samples:modular-android:modular-api')
+  for (feature in features) {
+    implementation project(":samples:modular-android:modular-$feature")
+  }
+
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+  androidTestImplementation "androidx.test:runner:$testRunnerVersion"
+  androidTestImplementation "androidx.test:rules:$testRulesVersion"
+  androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+  androidTestImplementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+}

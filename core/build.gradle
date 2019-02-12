@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+apply plugin: 'io.michaelrocks.pablo'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+  implementation "com.google.code.findbugs:jsr305:$jsr305Version"
+
+  testImplementation "junit:junit:$junitVersion"
+  testImplementation "com.google.code.findbugs:jsr305:$jsr305Version"
+}
+
+jar {
+  destinationDir = file('build/jar')
+}

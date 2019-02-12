@@ -1,0 +1,24 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'io.michaelrocks.colonist'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+mainClassName = 'io.michaelrocks.colonist.sample.ColonistSample'
+
+dependencies {
+  testImplementation "junit:junit:$junitVersion"
+}
+
+jar {
+  destinationDir = file('build/jar')
+
+  from {
+    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+}
+
+colonist {
+  processTest false
+}
