@@ -46,15 +46,8 @@ class JavaColonistPlugin : BaseColonistPlugin() {
   }
 
   private fun addDependencies() {
-    val version = GradleVersion.parse(project.gradle.gradleVersion)
-    if (version >= GRADLE_VERSION_WITH_IMPLEMENTATION) {
-      addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
-      addDependencies(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
-    } else {
-      @Suppress("DEPRECATION")
-      addDependencies(JavaPlugin.COMPILE_CONFIGURATION_NAME)
-      addDependencies(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME)
-    }
+    addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+    addDependencies(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
   }
 
   private fun setupColonistForJava() {
@@ -78,17 +71,8 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       compileTask.options.bootstrapClasspath?.toList()
         ?: System.getProperty("sun.boot.class.path")?.split(File.pathSeparator)?.map { File(it) }
         ?: emptyList()
-    val colonistTask =
-      createColonistProcessTask(
-        "colonistProcess$suffix",
-        classesDirs,
-        backupDirs,
-        sourceDir,
-        classpath,
-        bootClasspath
-      )
-    val backupTask =
-      createBackupClassFilesTask("colonistBackupClasses$suffix", classesDirs, backupDirs)
+    val colonistTask = createColonistProcessTask("colonistProcess$suffix", classesDirs, backupDirs, sourceDir, classpath, bootClasspath)
+    val backupTask = createBackupClassFilesTask("colonistBackupClasses$suffix", classesDirs, backupDirs)
     configureTasks(colonistTask, backupTask, compileTask)
   }
 
@@ -97,13 +81,7 @@ class JavaColonistPlugin : BaseColonistPlugin() {
   }
 
   private fun getClassesDirs(output: SourceSetOutput): List<File> {
-    val version = GradleVersion.parse(project.gradle.gradleVersion)
-    if (version.isAtLeast(4, 0, 0)) {
-      return output.classesDirs.files.toList()
-    } else {
-      @Suppress("DEPRECATION")
-      return listOf(output.classesDir)
-    }
+    return output.classesDirs.files.toList()
   }
 
   private fun getBackupDirs(buildDir: File, colonistDir: File, classesDirs: List<File>): List<File> {
@@ -170,7 +148,5 @@ class JavaColonistPlugin : BaseColonistPlugin() {
 
   companion object {
     private const val COLONIST_PATH = "colonist"
-
-    private val GRADLE_VERSION_WITH_IMPLEMENTATION = GradleVersion.create(3, 4, 0)
   }
 }
