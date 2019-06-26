@@ -33,15 +33,14 @@ class ColonistTransform(private val project: Project) : Transform() {
   private val logger = getLogger()
 
   override fun transform(invocation: TransformInvocation) {
+    if (!invocation.isIncremental) {
+      invocation.outputProvider.deleteAll()
+    }
+
     val inputs = invocation.inputs.flatMap { it.jarInputs + it.directoryInputs }
     val outputs = inputs.map { input ->
       val format = if (input is JarInput) Format.JAR else Format.DIRECTORY
-      invocation.outputProvider.getContentLocation(
-        input.name,
-        input.contentTypes,
-        input.scopes,
-        format
-      )
+      invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, format)
     }
 
     val parameters = ColonistParameters(
