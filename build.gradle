@@ -3,7 +3,7 @@ allprojects {
   group = 'io.michaelrocks.colonist'
 
   ext.kotlinVersion = '1.3.40'
-  ext.pabloVersion = '1.0.3'
+  ext.pabloVersion = '1.0.4'
 
   ext.jsr305Version = '3.0.2'
   ext.asmVersion = '7.0'
