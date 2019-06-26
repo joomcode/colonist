@@ -15,10 +15,10 @@ allprojects {
   ext.testRulesVersion = '1.2.0'
   ext.testRunnerVersion = '1.2.0'
 
-  ext.androidCompileSdkVersion = 28
-  ext.androidTargetSdkVersion = 28
+  ext.androidCompileSdkVersion = 29
+  ext.androidTargetSdkVersion = 29
   ext.androidMinSdkVersion = 16
-  ext.androidBuildToolsVersion = '28.0.3'
+  ext.androidBuildToolsVersion = '29.0.0'
   ext.androidToolsVersion = '3.4.1'
 
   ext.androidxAnnotationVersion = '1.1.0'
