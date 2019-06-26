@@ -61,7 +61,8 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
     ColonyParserImpl(grip, annotationIndex, SettlerParserImpl(grip, SettlerFactoryParserImpl, SettlerAcceptorParserImpl), errorReporter)
 
   fun processClasses() {
-    val colonies = findColonies()
+    val markers = findColonyMarkers()
+    val colonies = findColonies(markers)
     checkErrors()
     copyAndPatchClasses(colonies)
   }
@@ -84,7 +85,7 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
     }
   }
 
-  private fun findColonies(colonyMarkers: Collection<ColonyMarker> = findColonyMarkers()): Collection<Colony> {
+  private fun findColonies(colonyMarkers: Collection<ColonyMarker>): Collection<Colony> {
     return colonyMarkers.flatMap { findColonies(it) }
   }
 
