@@ -25,19 +25,11 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     super.apply(project)
 
     if (project.hasAndroid) {
-      addDependencies(getConfigurationName())
+      @Suppress("UnstableApiUsage")
+      addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
       project.android.registerTransform(ColonistTransform(project))
     } else {
       throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
-    }
-  }
-
-  private fun getConfigurationName(): String {
-    return if (PluginVersion.major >= 3) {
-      JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME
-    } else {
-      @Suppress("DEPRECATION")
-      JavaPlugin.COMPILE_CONFIGURATION_NAME
     }
   }
 }
