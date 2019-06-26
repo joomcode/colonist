@@ -17,9 +17,9 @@
 package io.michaelrocks.colonist.modular
 
 import io.michaelrocks.colonist.Colony
-import io.michaelrocks.colonist.ConstructorSettlerFactory
+import io.michaelrocks.colonist.ConstructorSettlerProducer
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-@Colony(settlerAnnotation = AntSettler::class, defaultSettlerFactory = ConstructorSettlerFactory::class)
+@Colony(settlerAnnotation = AntSettler::class, defaultSettlerProducer = ConstructorSettlerProducer::class)
 annotation class AntColony

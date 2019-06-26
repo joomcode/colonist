@@ -20,6 +20,6 @@ import io.michaelrocks.grip.mirrors.Type
 
 data class Settler(
   val type: Type.Object,
-  val settlerFactory: SettlerFactory,
+  val settlerProducer: SettlerProducer,
   val settlerAcceptor: SettlerAcceptor
 )

@@ -16,16 +16,13 @@
 
 package io.michaelrocks.colonist;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.annotation.Nonnull;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.CLASS)
-@Documented
-public @interface OnCreateSettler {
-  Class<? extends Annotation> colonyAnnotation();
+public class CallbackSettlerProducer<S> implements SettlerProducer<S> {
+  @Nonnull
+  @Override
+  public S produceSettler(@Nonnull final Class<?> settlerClass) {
+    // This is a marker class. Actual implementation of the producer will be generated.
+    throw new UnsupportedOperationException();
+  }
 }

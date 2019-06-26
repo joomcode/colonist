@@ -18,11 +18,7 @@ package io.michaelrocks.colonist;
 
 import javax.annotation.Nonnull;
 
-public class CallbackSettlerFactory<S> implements SettlerFactory<S> {
+public interface SettlerProducer<S> {
   @Nonnull
-  @Override
-  public S createSettler(@Nonnull final Class<?> settlerClass) {
-    // This is a marker class. Actual implementation of the factory will be generated.
-    throw new UnsupportedOperationException();
-  }
+  S produceSettler(@Nonnull Class<?> settlerClass);
 }

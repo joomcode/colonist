@@ -17,27 +17,26 @@
 package io.michaelrocks.colonist.processor.commons
 
 import io.michaelrocks.colonist.CallbackSettlerAcceptor
-import io.michaelrocks.colonist.CallbackSettlerFactory
-import io.michaelrocks.colonist.ClassSettlerFactory
+import io.michaelrocks.colonist.CallbackSettlerProducer
+import io.michaelrocks.colonist.ClassSettlerProducer
 import io.michaelrocks.colonist.Colony
-import io.michaelrocks.colonist.ConstructorSettlerFactory
+import io.michaelrocks.colonist.ConstructorSettlerProducer
 import io.michaelrocks.colonist.NoneSettlerAcceptor
 import io.michaelrocks.colonist.OnAcceptSettler
-import io.michaelrocks.colonist.OnCreateSettler
+import io.michaelrocks.colonist.OnProduceSettler
 import io.michaelrocks.colonist.internal.ColonyFounder
 import io.michaelrocks.grip.mirrors.getObjectType
-import java.lang.reflect.Type as JavaType
 
 object Types {
   val OBJECT_TYPE = getObjectType<Any>()
   val CLASS_TYPE = getObjectType<Class<*>>()
 
   val COLONY_TYPE = getObjectType<Colony>()
-  val ON_CREATE_SETTLER_TYPE = getObjectType<OnCreateSettler>()
+  val ON_PRODUCE_SETTLER_TYPE = getObjectType<OnProduceSettler>()
   val ON_ACCEPT_SETTLER_TYPE = getObjectType<OnAcceptSettler>()
-  val CONSTRUCTOR_SETTLER_FACTORY = getObjectType<ConstructorSettlerFactory<*>>()
-  val CALLBACK_SETTLER_FACTORY = getObjectType<CallbackSettlerFactory<*>>()
-  val CLASS_SETTLER_FACTORY = getObjectType<ClassSettlerFactory>()
+  val CONSTRUCTOR_SETTLER_PRODUCER = getObjectType<ConstructorSettlerProducer<*>>()
+  val CALLBACK_SETTLER_PRODUCER = getObjectType<CallbackSettlerProducer<*>>()
+  val CLASS_SETTLER_PRODUCER = getObjectType<ClassSettlerProducer>()
   val NONE_SETTLER_ACCEPTOR = getObjectType<NoneSettlerAcceptor<*, *>>()
   val CALLBACK_SETTLER_ACCEPTOR = getObjectType<CallbackSettlerAcceptor<*, *>>()
 

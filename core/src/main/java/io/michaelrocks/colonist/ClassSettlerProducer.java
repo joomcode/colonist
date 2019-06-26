@@ -18,11 +18,11 @@ package io.michaelrocks.colonist;
 
 import javax.annotation.Nonnull;
 
-public class ConstructorSettlerFactory<S> implements SettlerFactory<S> {
+public class ClassSettlerProducer implements SettlerProducer<Class<?>> {
   @Nonnull
   @Override
-  public S createSettler(@Nonnull final Class<?> settlerClass) {
-    // This is a marker class. Actual implementation of the factory will be generated.
-    throw new UnsupportedOperationException();
+  public Class<?> produceSettler(@Nonnull final Class<?> settlerClass) {
+    // This is a marker class. Actual implementation of the producer will be generated.
+    return settlerClass;
   }
 }

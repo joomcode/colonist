@@ -17,20 +17,20 @@
 package io.michaelrocks.colonist.processor.analysis
 
 import io.michaelrocks.colonist.processor.commons.Types
-import io.michaelrocks.colonist.processor.model.SettlerFactory
+import io.michaelrocks.colonist.processor.model.SettlerProducer
 import io.michaelrocks.grip.mirrors.Type
 
-interface SettlerFactoryParser {
-  fun parseSettlerFactory(settlerFactoryType: Type.Object): SettlerFactory
+interface SettlerProducerParser {
+  fun parseSettlerProducer(settlerProducerType: Type.Object): SettlerProducer
 }
 
-object SettlerFactoryParserImpl : SettlerFactoryParser {
-  override fun parseSettlerFactory(settlerFactoryType: Type.Object): SettlerFactory {
-    return when (settlerFactoryType) {
-      Types.CONSTRUCTOR_SETTLER_FACTORY -> SettlerFactory.Constructor
-      Types.CALLBACK_SETTLER_FACTORY -> SettlerFactory.Callback
-      Types.CLASS_SETTLER_FACTORY -> SettlerFactory.Class
-      else -> SettlerFactory.External(settlerFactoryType)
+object SettlerProducerParserImpl : SettlerProducerParser {
+  override fun parseSettlerProducer(settlerProducerType: Type.Object): SettlerProducer {
+    return when (settlerProducerType) {
+      Types.CONSTRUCTOR_SETTLER_PRODUCER -> SettlerProducer.Constructor
+      Types.CALLBACK_SETTLER_PRODUCER -> SettlerProducer.Callback
+      Types.CLASS_SETTLER_PRODUCER -> SettlerProducer.Class
+      else -> SettlerProducer.External(settlerProducerType)
     }
   }
 }

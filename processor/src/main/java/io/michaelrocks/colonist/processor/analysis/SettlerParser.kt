@@ -27,7 +27,7 @@ interface SettlerParser {
 
 class SettlerParserImpl(
   private val grip: Grip,
-  private val settlerFactoryParser: SettlerFactoryParser,
+  private val settlerProducerParser: SettlerProducerParser,
   private val settlerAcceptorParser: SettlerAcceptorParser
 ) : SettlerParser {
 
@@ -37,15 +37,15 @@ class SettlerParserImpl(
       "${settlerType.className} must be annotated with @${colonyMarker.settlerMarker.type.className} annotation"
     }
 
-    val settlerFactory = colonyMarker.settlerMarker.settlerFactoryPropertyName?.let { settlerFactoryPropertyName ->
-      val settlerFactoryType = annotation.requireValue<Type.Object>(settlerFactoryPropertyName)
-      settlerFactoryParser.parseSettlerFactory(settlerFactoryType)
-    } ?: colonyMarker.defaultSettlerFactory
+    val settlerProducer = colonyMarker.settlerMarker.settlerProducerPropertyName?.let { settlerProducerPropertyName ->
+      val settlerProducerType = annotation.requireValue<Type.Object>(settlerProducerPropertyName)
+      settlerProducerParser.parseSettlerProducer(settlerProducerType)
+    } ?: colonyMarker.defaultSettlerProducer
     val settlerAcceptor = colonyMarker.settlerMarker.settlerAcceptorPropertyName?.let { settlerAcceptorPropertyName ->
       val settlerAcceptorType = annotation.requireValue<Type.Object>(settlerAcceptorPropertyName)
       settlerAcceptorParser.parseSettlerAcceptor(settlerAcceptorType)
     } ?: colonyMarker.defaultSettlerAcceptor
 
-    return Settler(settlerType, settlerFactory, settlerAcceptor)
+    return Settler(settlerType, settlerProducer, settlerAcceptor)
   }
 }

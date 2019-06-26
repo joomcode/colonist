@@ -23,6 +23,6 @@ data class Colony(
   val type: Type.Object,
   val marker: ColonyMarker,
   val settlers: Collection<Settler>,
-  val settlerCreator: MethodMirror?,
+  val settlerProducer: MethodMirror?,
   val settlerAcceptor: MethodMirror?
 )

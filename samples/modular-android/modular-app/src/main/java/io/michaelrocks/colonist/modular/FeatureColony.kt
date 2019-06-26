@@ -17,10 +17,10 @@
 package io.michaelrocks.colonist.modular
 
 import io.michaelrocks.colonist.Colony
-import io.michaelrocks.colonist.ConstructorSettlerFactory
+import io.michaelrocks.colonist.ConstructorSettlerProducer
 import io.michaelrocks.colonist.modular.api.FeatureSettler
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS)
-@Colony(settlerAnnotation = FeatureSettler::class, defaultSettlerFactory = ConstructorSettlerFactory::class)
+@Colony(settlerAnnotation = FeatureSettler::class, defaultSettlerProducer = ConstructorSettlerProducer::class)
 annotation class FeatureColony

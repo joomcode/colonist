@@ -20,9 +20,9 @@ import io.michaelrocks.colonist.processor.analysis.AnnotationIndex
 import io.michaelrocks.colonist.processor.analysis.ColonyMarkerParserImpl
 import io.michaelrocks.colonist.processor.analysis.ColonyParserImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerAcceptorParserImpl
-import io.michaelrocks.colonist.processor.analysis.SettlerFactoryParserImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerMarkerParserImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerParserImpl
+import io.michaelrocks.colonist.processor.analysis.SettlerProducerParserImpl
 import io.michaelrocks.colonist.processor.commons.StandaloneClassWriter
 import io.michaelrocks.colonist.processor.commons.Types
 import io.michaelrocks.colonist.processor.commons.closeQuietly
@@ -56,9 +56,9 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
 
   private val annotationIndex = buildAnnotationIndex(grip)
   private val colonyMarkerParser =
-    ColonyMarkerParserImpl(grip, SettlerMarkerParserImpl, SettlerFactoryParserImpl, SettlerAcceptorParserImpl)
+    ColonyMarkerParserImpl(grip, SettlerMarkerParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
   private val colonyParser =
-    ColonyParserImpl(grip, annotationIndex, SettlerParserImpl(grip, SettlerFactoryParserImpl, SettlerAcceptorParserImpl), errorReporter)
+    ColonyParserImpl(grip, annotationIndex, SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl), errorReporter)
 
   fun processClasses() {
     val markers = findColonyMarkers()

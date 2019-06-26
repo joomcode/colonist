@@ -22,10 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.michaelrocks.colonist.Colony;
-import io.michaelrocks.colonist.ConstructorSettlerFactory;
+import io.michaelrocks.colonist.ConstructorSettlerProducer;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-@Colony(settlerAnnotation = AntSettler.class, defaultSettlerFactory = ConstructorSettlerFactory.class)
+@Colony(settlerAnnotation = AntSettler.class, defaultSettlerProducer = ConstructorSettlerProducer.class)
 public @interface AntColony {
 }

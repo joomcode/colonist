@@ -28,7 +28,7 @@ import io.michaelrocks.colonist.processor.descriptors.descriptor
 import io.michaelrocks.colonist.processor.model.Colony
 import io.michaelrocks.colonist.processor.model.Settler
 import io.michaelrocks.colonist.processor.model.SettlerAcceptor
-import io.michaelrocks.colonist.processor.model.SettlerFactory
+import io.michaelrocks.colonist.processor.model.SettlerProducer
 import io.michaelrocks.colonist.processor.watermark.WatermarkClassVisitor
 import io.michaelrocks.grip.mirrors.Type
 import io.michaelrocks.grip.mirrors.getObjectTypeByInternalName
@@ -104,19 +104,19 @@ class Patcher(
   private fun generateColonyFounderMethod(method: ColonyMethod) {
     classVisitor.newMethod(Opcodes.ACC_PRIVATE, method.method) {
       for (settler in method.colony.settlers) {
-        createSettler(method.colony, settler)
-        settleSettler(method.colony, settler)
+        produceSettler(method.colony, settler)
+        acceptSettler(method.colony, settler)
       }
     }
   }
 
-  private fun GeneratorAdapter.createSettler(colony: Colony, settler: Settler) {
+  private fun GeneratorAdapter.produceSettler(colony: Colony, settler: Settler) {
     exhaustive(
-      when (settler.settlerFactory) {
-        SettlerFactory.Constructor -> invokeDefaultConstructor(settler.type)
-        SettlerFactory.Callback -> invokeCreateCallback(colony, settler)
-        SettlerFactory.Class -> push(settler.type)
-        is SettlerFactory.External -> TODO("External factories aren't supported yet")
+      when (settler.settlerProducer) {
+        SettlerProducer.Constructor -> invokeDefaultConstructor(settler.type)
+        SettlerProducer.Callback -> invokeProduceCallback(colony, settler)
+        SettlerProducer.Class -> push(settler.type)
+        is SettlerProducer.External -> TODO("External producers aren't supported yet")
       }
     )
   }
@@ -127,8 +127,8 @@ class Patcher(
     invokeConstructor(type, MethodDescriptor.forDefaultConstructor())
   }
 
-  private fun GeneratorAdapter.invokeCreateCallback(colony: Colony, settler: Settler) {
-    val callback = colony.settlerCreator!!
+  private fun GeneratorAdapter.invokeProduceCallback(colony: Colony, settler: Settler) {
+    val callback = colony.settlerProducer!!
     val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
 
     if (isCallbackStatic) {
@@ -144,7 +144,7 @@ class Patcher(
     }
   }
 
-  private fun GeneratorAdapter.settleSettler(colony: Colony, settler: Settler) {
+  private fun GeneratorAdapter.acceptSettler(colony: Colony, settler: Settler) {
     exhaustive(
       when (settler.settlerAcceptor) {
         SettlerAcceptor.None -> pop()

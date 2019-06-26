@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 public @interface Colony {
   Class<? extends Annotation> settlerAnnotation();
 
-  Class<? extends SettlerFactory> defaultSettlerFactory() default CallbackSettlerFactory.class;
+  Class<? extends SettlerProducer> defaultSettlerProducer() default CallbackSettlerProducer.class;
 
   Class<? extends SettlerAcceptor> defaultSettlerAcceptor() default CallbackSettlerAcceptor.class;
 }

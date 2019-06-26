@@ -22,7 +22,7 @@ import io.michaelrocks.colonist.processor.model.Colony
 import io.michaelrocks.colonist.processor.model.ColonyMarker
 import io.michaelrocks.colonist.processor.model.Settler
 import io.michaelrocks.colonist.processor.model.SettlerAcceptor
-import io.michaelrocks.colonist.processor.model.SettlerFactory
+import io.michaelrocks.colonist.processor.model.SettlerProducer
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.MethodMirror
@@ -43,13 +43,13 @@ class ColonyParserImpl(
     val mirror = grip.classRegistry.getClassMirror(colonyType)
     // TODO: Make settlers parse once when there're multiple colonies with the same marker.
     val settlers = parseSettlers(colonyMarker)
-    val settlerCreator = findColonyCallbackMethod(mirror, Types.ON_CREATE_SETTLER_TYPE, colonyMarker.type)
+    val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type)
     val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type)
 
-    validateSettlerCreator(colonyType, settlers, settlerCreator)
+    validateSettlerProducer(colonyType, settlers, settlerProducer)
     validateSettlerAcceptor(colonyType, settlers, settlerAcceptor)
 
-    return Colony(colonyType, colonyMarker, settlers, settlerCreator, settlerAcceptor)
+    return Colony(colonyType, colonyMarker, settlers, settlerProducer, settlerAcceptor)
   }
 
   private fun parseSettlers(colonyMarker: ColonyMarker): Collection<Settler> {
@@ -84,22 +84,22 @@ class ColonyParserImpl(
     return method
   }
 
-  private fun validateSettlerCreator(colonyType: Type.Object, settlers: Collection<Settler>, settlerCreator: MethodMirror?) {
-    if (settlerCreator != null) {
+  private fun validateSettlerProducer(colonyType: Type.Object, settlers: Collection<Settler>, settlerProducer: MethodMirror?) {
+    if (settlerProducer != null) {
       return
     }
 
-    val settlerTypesWithCallbackCreator = settlers.mapNotNull { settler ->
-      settler.type.takeIf { settler.settlerFactory is SettlerFactory.Callback }
+    val settlerTypesWithCallbackProducer = settlers.mapNotNull { settler ->
+      settler.type.takeIf { settler.settlerProducer is SettlerProducer.Callback }
     }
 
-    if (settlerTypesWithCallbackCreator.isEmpty()) {
+    if (settlerTypesWithCallbackProducer.isEmpty()) {
       return
     }
 
     val colonyClassName = colonyType.className
-    val settlerClassNames = settlerTypesWithCallbackCreator.joinToString { it.className }
-    errorReporter.reportError("Colony $colonyClassName expected to have a factory callback for settlers [$settlerClassNames]")
+    val settlerClassNames = settlerTypesWithCallbackProducer.joinToString { it.className }
+    errorReporter.reportError("Colony $colonyClassName expected to have a producer callback for settlers [$settlerClassNames]")
   }
 
   private fun validateSettlerAcceptor(colonyType: Type.Object, settlers: Collection<Settler>, settlerAcceptor: MethodMirror?) {

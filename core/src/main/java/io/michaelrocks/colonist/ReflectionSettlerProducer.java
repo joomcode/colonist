@@ -18,7 +18,15 @@ package io.michaelrocks.colonist;
 
 import javax.annotation.Nonnull;
 
-public interface SettlerFactory<S> {
+public class ReflectionSettlerProducer<S> implements SettlerProducer<S> {
   @Nonnull
-  S createSettler(@Nonnull Class<?> settlerClass);
+  @Override
+  public S produceSettler(@Nonnull final Class<?> settlerClass) {
+    try {
+      //noinspection unchecked
+      return (S) settlerClass.newInstance();
+    } catch (final InstantiationException | IllegalAccessException exception) {
+      throw new ColonistException(exception);
+    }
+  }
 }

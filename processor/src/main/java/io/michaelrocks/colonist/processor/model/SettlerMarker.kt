@@ -20,6 +20,6 @@ import io.michaelrocks.grip.mirrors.Type
 
 data class SettlerMarker(
   val type: Type.Object,
-  val settlerFactoryPropertyName: String?,
+  val settlerProducerPropertyName: String?,
   val settlerAcceptorPropertyName: String?
 )
