@@ -16,18 +16,13 @@
 
 package io.michaelrocks.colonist.modular
 
-import android.app.Activity
-import android.os.Bundle
-import android.widget.TextView
+import io.michaelrocks.colonist.ColonistException
+import org.junit.Test
 
-class MainActivity : Activity() {
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.main)
-
-    val textView = findViewById<TextView>(R.id.text_view)
-    FeatureManager { feature ->
-      textView.append("Registered feature $feature\n")
-    }
+class FeatureManagerTest {
+  @Test(expected = ColonistException::class)
+  fun testFeatureManagerIsNotProcessed() {
+    // Unit tests aren't processed with the transform.
+    FeatureManager {}
   }
 }

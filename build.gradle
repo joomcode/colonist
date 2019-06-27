@@ -11,9 +11,10 @@ allprojects {
   ext.logbackVersion = '1.2.3'
 
   ext.junitVersion = '4.12'
-  ext.espressoVersion = '3.2.0'
-  ext.testRulesVersion = '1.2.0'
-  ext.testRunnerVersion = '1.2.0'
+  ext.androidxEspressoVersion = '3.2.0'
+  ext.androidxTestRulesVersion = '1.2.0'
+  ext.androidxTestRunnerVersion = '1.2.0'
+  ext.androidxTestExtJunitVersion = '1.1.1'
 
   ext.androidCompileSdkVersion = 29
   ext.androidTargetSdkVersion = 29

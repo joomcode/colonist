@@ -20,10 +20,10 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
 
-  androidTestImplementation "androidx.test:runner:$testRunnerVersion"
-  androidTestImplementation "androidx.test:rules:$testRulesVersion"
-  androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-  androidTestImplementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-
   testImplementation "junit:junit:$junitVersion"
+
+  androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoVersion"
+  androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
+  androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
+  androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
 }

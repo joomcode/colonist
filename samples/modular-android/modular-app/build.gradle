@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'io.michaelrocks.colonist.android'
 
+def enabledFeatures = project.properties['enabledFeatures']?.toString() ?: ''
+
 android {
   compileSdkVersion androidCompileSdkVersion
   buildToolsVersion androidBuildToolsVersion
@@ -13,23 +15,24 @@ android {
     versionCode 1
     versionName version
 
+    buildConfigField 'String', 'ENABLED_FEATURES', "\"$enabledFeatures\""
+
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
 }
 
 dependencies {
-  def featuresString = project.properties['enabledFeatures']?.toString() ?: ""
-  def features = featuresString.tokenize(",")
-
   implementation project(':samples:modular-android:modular-api')
-  for (feature in features) {
+  for (feature in enabledFeatures.tokenize(',')) {
     implementation project(":samples:modular-android:modular-$feature")
   }
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-  androidTestImplementation "androidx.test:runner:$testRunnerVersion"
-  androidTestImplementation "androidx.test:rules:$testRulesVersion"
-  androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-  androidTestImplementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+  testImplementation "junit:junit:$junitVersion"
+
+  androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoVersion"
+  androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
+  androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
+  androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
 }
