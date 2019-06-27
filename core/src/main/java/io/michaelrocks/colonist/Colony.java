@@ -16,7 +16,6 @@
 
 package io.michaelrocks.colonist;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,9 +26,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Documented
 public @interface Colony {
-  Class<? extends Annotation> settlerAnnotation();
-
-  Class<? extends SettlerProducer> defaultSettlerProducer() default CallbackSettlerProducer.class;
-
-  Class<? extends SettlerAcceptor> defaultSettlerAcceptor() default CallbackSettlerAcceptor.class;
 }

@@ -16,10 +16,7 @@
 
 package io.michaelrocks.colonist.processor.model
 
-import io.michaelrocks.grip.mirrors.Type
-
 sealed class SettlerAcceptor {
   object None : SettlerAcceptor()
   object Callback : SettlerAcceptor()
-  data class External(val acceptorType: Type.Object) : SettlerAcceptor()
 }

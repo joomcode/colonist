@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package io.michaelrocks.colonist.processor.model
+package io.michaelrocks.colonist;
 
-import io.michaelrocks.grip.mirrors.Type
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-data class SettlerMarker(
-  val type: Type.Object,
-  val settlerProducerPropertyName: String?,
-  val settlerAcceptorPropertyName: String?
-)
+@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface ProduceSettlersViaCallback {
+}

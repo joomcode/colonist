@@ -16,11 +16,8 @@
 
 package io.michaelrocks.colonist.processor.model
 
-import io.michaelrocks.grip.mirrors.Type
-
 sealed class SettlerProducer {
   object Constructor : SettlerProducer()
   object Callback : SettlerProducer()
   object Class : SettlerProducer()
-  data class External(val producerType: Type.Object) : SettlerProducer()
 }

@@ -16,10 +16,15 @@
 
 package io.michaelrocks.colonist.modular
 
+import io.michaelrocks.colonist.AcceptSettlersViaCallback
 import io.michaelrocks.colonist.Colony
-import io.michaelrocks.colonist.ConstructorSettlerProducer
+import io.michaelrocks.colonist.ProduceSettlersViaConstructor
+import io.michaelrocks.colonist.SelectSettlersByAnnotation
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-@Colony(settlerAnnotation = AntSettler::class, defaultSettlerProducer = ConstructorSettlerProducer::class)
+@Colony
+@SelectSettlersByAnnotation(AntSettler::class)
+@ProduceSettlersViaConstructor
+@AcceptSettlersViaCallback
 annotation class AntColony

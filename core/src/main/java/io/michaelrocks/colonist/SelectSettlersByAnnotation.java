@@ -16,11 +16,16 @@
 
 package io.michaelrocks.colonist;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class NoneSettlerAcceptor<T, C> implements SettlerAcceptor<T, C> {
-  @Override
-  public void acceptSettler(@Nonnull final C colony, @Nonnull final T settler) {
-    // Do nothing. Actually, this method will never be called.
-  }
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface SelectSettlersByAnnotation {
+  Class<? extends Annotation> value();
 }

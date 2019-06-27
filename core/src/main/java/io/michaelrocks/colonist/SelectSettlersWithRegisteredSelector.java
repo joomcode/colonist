@@ -16,17 +16,14 @@
 
 package io.michaelrocks.colonist;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ReflectionSettlerProducer<S> implements SettlerProducer<S> {
-  @Nonnull
-  @Override
-  public S produceSettler(@Nonnull final Class<?> settlerClass) {
-    try {
-      //noinspection unchecked
-      return (S) settlerClass.newInstance();
-    } catch (final InstantiationException | IllegalAccessException exception) {
-      throw new ColonistException(exception);
-    }
-  }
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface SelectSettlersWithRegisteredSelector {
 }

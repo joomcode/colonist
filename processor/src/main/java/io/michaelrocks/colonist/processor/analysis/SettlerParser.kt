@@ -16,13 +16,12 @@
 
 package io.michaelrocks.colonist.processor.analysis
 
-import io.michaelrocks.colonist.processor.model.ColonyMarker
 import io.michaelrocks.colonist.processor.model.Settler
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.mirrors.Type
 
 interface SettlerParser {
-  fun parseSettler(settlerType: Type.Object, colonyMarker: ColonyMarker): Settler
+  fun parseSettler(settlerType: Type.Object): Settler
 }
 
 class SettlerParserImpl(
@@ -31,21 +30,10 @@ class SettlerParserImpl(
   private val settlerAcceptorParser: SettlerAcceptorParser
 ) : SettlerParser {
 
-  override fun parseSettler(settlerType: Type.Object, colonyMarker: ColonyMarker): Settler {
+  override fun parseSettler(settlerType: Type.Object): Settler {
     val mirror = grip.classRegistry.getClassMirror(settlerType)
-    val annotation = requireNotNull(mirror.annotations[colonyMarker.settlerMarker.type]) {
-      "${settlerType.className} must be annotated with @${colonyMarker.settlerMarker.type.className} annotation"
-    }
-
-    val settlerProducer = colonyMarker.settlerMarker.settlerProducerPropertyName?.let { settlerProducerPropertyName ->
-      val settlerProducerType = annotation.requireValue<Type.Object>(settlerProducerPropertyName)
-      settlerProducerParser.parseSettlerProducer(settlerProducerType)
-    } ?: colonyMarker.defaultSettlerProducer
-    val settlerAcceptor = colonyMarker.settlerMarker.settlerAcceptorPropertyName?.let { settlerAcceptorPropertyName ->
-      val settlerAcceptorType = annotation.requireValue<Type.Object>(settlerAcceptorPropertyName)
-      settlerAcceptorParser.parseSettlerAcceptor(settlerAcceptorType)
-    } ?: colonyMarker.defaultSettlerAcceptor
-
+    val settlerProducer = mirror.getSettlerProducerOrNull(settlerProducerParser)
+    val settlerAcceptor = mirror.getSettlerAcceptorOrNull(settlerAcceptorParser)
     return Settler(settlerType, settlerProducer, settlerAcceptor)
   }
 }

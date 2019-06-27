@@ -20,7 +20,7 @@ import io.michaelrocks.grip.mirrors.Type
 
 data class ColonyMarker(
   val type: Type.Object,
-  val settlerMarker: SettlerMarker,
-  val defaultSettlerProducer: SettlerProducer,
-  val defaultSettlerAcceptor: SettlerAcceptor
+  val settlerSelector: SettlerSelector,
+  val settlerProducer: SettlerProducer,
+  val settlerAcceptor: SettlerAcceptor
 )

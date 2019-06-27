@@ -17,12 +17,16 @@
 package io.michaelrocks.colonist.processor
 
 import io.michaelrocks.colonist.processor.analysis.AnnotationIndex
+import io.michaelrocks.colonist.processor.analysis.ColonyMarkerParser
 import io.michaelrocks.colonist.processor.analysis.ColonyMarkerParserImpl
+import io.michaelrocks.colonist.processor.analysis.ColonyParser
 import io.michaelrocks.colonist.processor.analysis.ColonyParserImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerAcceptorParserImpl
-import io.michaelrocks.colonist.processor.analysis.SettlerMarkerParserImpl
+import io.michaelrocks.colonist.processor.analysis.SettlerDiscoverer
+import io.michaelrocks.colonist.processor.analysis.SettlerDiscovererImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerParserImpl
 import io.michaelrocks.colonist.processor.analysis.SettlerProducerParserImpl
+import io.michaelrocks.colonist.processor.analysis.SettlerSelectorParserImpl
 import io.michaelrocks.colonist.processor.commons.StandaloneClassWriter
 import io.michaelrocks.colonist.processor.commons.Types
 import io.michaelrocks.colonist.processor.commons.closeQuietly
@@ -30,6 +34,8 @@ import io.michaelrocks.colonist.processor.generation.Patcher
 import io.michaelrocks.colonist.processor.logging.getLogger
 import io.michaelrocks.colonist.processor.model.Colony
 import io.michaelrocks.colonist.processor.model.ColonyMarker
+import io.michaelrocks.colonist.processor.model.Settler
+import io.michaelrocks.colonist.processor.model.SettlerSelector
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.GripFactory
 import io.michaelrocks.grip.classes
@@ -40,29 +46,29 @@ import io.michaelrocks.grip.mirrors.Annotated
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import java.io.Closeable
+import java.io.File
 
-class ColonistProcessor(parameters: ColonistParameters) : Closeable {
+class ColonistProcessor(
+  inputs: List<File>,
+  outputs: List<File>,
+  private val grip: Grip,
+  private val annotationIndex: AnnotationIndex,
+  private val colonyMarkerParser: ColonyMarkerParser,
+  private val colonyParser: ColonyParser,
+  private val settlerDiscoverer: SettlerDiscoverer,
+  private val errorReporter: ErrorReporter
+) : Closeable {
 
   private val logger = getLogger()
 
-  private val grip: Grip = GripFactory.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
-  private val errorReporter = ErrorReporter()
-
-  private val fileSourcesAndSinks = parameters.inputs.zip(parameters.outputs) { input, output ->
+  private val fileSourcesAndSinks = inputs.zip(outputs) { input, output ->
     val source = IoFactory.createFileSource(input)
     val sink = IoFactory.createFileSink(input, output)
     source to sink
   }
 
-  private val annotationIndex = buildAnnotationIndex(grip)
-  private val colonyMarkerParser =
-    ColonyMarkerParserImpl(grip, SettlerMarkerParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
-  private val colonyParser =
-    ColonyParserImpl(grip, annotationIndex, SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl), errorReporter)
-
   fun processClasses() {
-    val markers = findColonyMarkers()
-    val colonies = findColonies(markers)
+    val colonies = findColonies()
     checkErrors()
     copyAndPatchClasses(colonies)
   }
@@ -74,31 +80,10 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
     }
   }
 
-  private fun buildAnnotationIndex(grip: Grip): AnnotationIndex {
-    return AnnotationIndex.build {
-      val query = grip select classes from classpath where annotated()
-      for (mirror in query.execute().classes) {
-        for (annotation in mirror.annotations) {
-          addAnnotatedType(mirror.type, annotation.type)
-        }
-      }
-    }
-  }
-
-  private fun findColonies(colonyMarkers: Collection<ColonyMarker>): Collection<Colony> {
-    return colonyMarkers.flatMap { findColonies(it) }
-  }
-
-  private fun findColonies(colonyMarker: ColonyMarker): Collection<Colony> {
-    val colonyTypes = annotationIndex.findClassesWithAnnotation(colonyMarker.type)
-    return colonyTypes.mapNotNull { colonyType ->
-      try {
-        colonyParser.parseColony(colonyType, colonyMarker)
-      } catch (exception: Exception) {
-        errorReporter.reportError(exception)
-        null
-      }
-    }
+  private fun findColonies(): Collection<Colony> {
+    val markers = findColonyMarkers()
+    val markersWithSettlers = findSettlersForColonyMarkers(markers)
+    return findColonies(markersWithSettlers)
   }
 
   private fun findColonyMarkers(): Collection<ColonyMarker> {
@@ -106,6 +91,33 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
     return colonyAnnotationTypes.mapNotNull { colonyAnnotationType ->
       try {
         colonyMarkerParser.parseColonyMarker(colonyAnnotationType)
+      } catch (exception: Exception) {
+        errorReporter.reportError(exception)
+        null
+      }
+    }
+  }
+
+  private fun findSettlersForColonyMarkers(colonyMarkers: Collection<ColonyMarker>): Collection<ColonyMarkerWithSettlers> {
+    val cache = HashMap<SettlerSelector, Collection<Settler>>()
+    return colonyMarkers.map { marker ->
+      val selector = marker.settlerSelector
+      val settlers = cache.getOrPut(selector) {
+        settlerDiscoverer.discoverSettlers(selector)
+      }
+      ColonyMarkerWithSettlers(marker, settlers)
+    }
+  }
+
+  private fun findColonies(colonyMarkersWithSettlers: Collection<ColonyMarkerWithSettlers>): Collection<Colony> {
+    return colonyMarkersWithSettlers.flatMap { findColonies(it.colonyMarker, it.settlers) }
+  }
+
+  private fun findColonies(colonyMarker: ColonyMarker, settlers: Collection<Settler>): Collection<Colony> {
+    val colonyTypes = annotationIndex.findClassesWithAnnotation(colonyMarker.type)
+    return colonyTypes.mapNotNull { colonyType ->
+      try {
+        colonyParser.parseColony(colonyType, colonyMarker, settlers)
       } catch (exception: Exception) {
         errorReporter.reportError(exception)
         null
@@ -151,13 +163,46 @@ class ColonistProcessor(parameters: ColonistParameters) : Closeable {
     return errorReporter.getErrors().joinToString("\n") { it.message.orEmpty() }
   }
 
-  private fun annotated() = { _: Grip, mirror: Annotated -> mirror.annotations.isNotEmpty() }
+  private data class ColonyMarkerWithSettlers(
+    val colonyMarker: ColonyMarker,
+    val settlers: Collection<Settler>
+  )
 
   companion object {
     fun process(parameters: ColonistParameters) {
-      ColonistProcessor(parameters).use {
+      val errorReporter = ErrorReporter()
+      val grip = GripFactory.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+      val annotationIndex = buildAnnotationIndex(grip)
+      val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
+      val colonyParser = ColonyParserImpl(grip, errorReporter)
+      val settlerParser = SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
+      val settlerDiscoverer = SettlerDiscovererImpl(grip, settlerParser)
+
+      ColonistProcessor(
+        parameters.inputs,
+        parameters.outputs,
+        grip,
+        annotationIndex,
+        colonyMarkerParser,
+        colonyParser,
+        settlerDiscoverer,
+        errorReporter
+      ).use {
         it.processClasses()
       }
     }
+
+    private fun buildAnnotationIndex(grip: Grip): AnnotationIndex {
+      return AnnotationIndex.build {
+        val query = grip select classes from classpath where annotated()
+        for (mirror in query.execute().classes) {
+          for (annotation in mirror.annotations) {
+            addAnnotatedType(mirror.type, annotation.type)
+          }
+        }
+      }
+    }
+
+    private fun annotated() = { _: Grip, mirror: Annotated -> mirror.annotations.isNotEmpty() }
   }
 }

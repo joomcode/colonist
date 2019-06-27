@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.michaelrocks.colonist.processor.analysis
+package io.michaelrocks.colonist;
 
-import io.michaelrocks.colonist.processor.model.SettlerMarker
-import io.michaelrocks.grip.mirrors.Type
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-interface SettlerMarkerParser {
-  fun parseSettlerMarker(settlerAnnotationType: Type.Object): SettlerMarker
-}
-
-object SettlerMarkerParserImpl : SettlerMarkerParser {
-  override fun parseSettlerMarker(settlerAnnotationType: Type.Object): SettlerMarker {
-    return SettlerMarker(settlerAnnotationType, null, null)
-  }
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface SelectSettlersBySuperType {
+  Class<?> value();
 }

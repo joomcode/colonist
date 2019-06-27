@@ -16,11 +16,16 @@
 
 package io.michaelrocks.colonist.modular
 
+import io.michaelrocks.colonist.AcceptSettlersViaCallback
 import io.michaelrocks.colonist.Colony
-import io.michaelrocks.colonist.ConstructorSettlerProducer
+import io.michaelrocks.colonist.ProduceSettlersViaConstructor
+import io.michaelrocks.colonist.SelectSettlersByAnnotation
 import io.michaelrocks.colonist.modular.api.FeatureSettler
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS)
-@Colony(settlerAnnotation = FeatureSettler::class, defaultSettlerProducer = ConstructorSettlerProducer::class)
+@Colony
+@SelectSettlersByAnnotation(FeatureSettler::class)
+@AcceptSettlersViaCallback
+@ProduceSettlersViaConstructor
 annotation class FeatureColony

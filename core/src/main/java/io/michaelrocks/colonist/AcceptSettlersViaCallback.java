@@ -16,12 +16,14 @@
 
 package io.michaelrocks.colonist;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class CallbackSettlerAcceptor<T, C> implements SettlerAcceptor<T, C> {
-  @Override
-  public void acceptSettler(@Nonnull final C colony, @Nonnull final T settler) {
-    // This is a marker class. Actual implementation of the class will be generated.
-    throw new UnsupportedOperationException();
-  }
+@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface AcceptSettlersViaCallback {
 }

@@ -18,19 +18,19 @@ package io.michaelrocks.colonist.processor.analysis
 
 import io.michaelrocks.colonist.processor.commons.Types
 import io.michaelrocks.colonist.processor.model.SettlerProducer
-import io.michaelrocks.grip.mirrors.Type
+import io.michaelrocks.grip.mirrors.AnnotationMirror
 
 interface SettlerProducerParser {
-  fun parseSettlerProducer(settlerProducerType: Type.Object): SettlerProducer
+  fun parseSettlerProducer(settlerProducerAnnotation: AnnotationMirror): SettlerProducer
 }
 
 object SettlerProducerParserImpl : SettlerProducerParser {
-  override fun parseSettlerProducer(settlerProducerType: Type.Object): SettlerProducer {
-    return when (settlerProducerType) {
-      Types.CONSTRUCTOR_SETTLER_PRODUCER -> SettlerProducer.Constructor
-      Types.CALLBACK_SETTLER_PRODUCER -> SettlerProducer.Callback
-      Types.CLASS_SETTLER_PRODUCER -> SettlerProducer.Class
-      else -> SettlerProducer.External(settlerProducerType)
+  override fun parseSettlerProducer(settlerProducerAnnotation: AnnotationMirror): SettlerProducer {
+    return when (settlerProducerAnnotation.type) {
+      Types.PRODUCE_SETTLERS_AS_CLASSES_TYPE -> SettlerProducer.Class
+      Types.PRODUCE_SETTLERS_VIA_CALLBACK_TYPE -> SettlerProducer.Callback
+      Types.PRODUCE_SETTLERS_VIA_CONSTRUCTOR_TYPE -> SettlerProducer.Constructor
+      else -> error("Unsupported settler producer annotation @${settlerProducerAnnotation.type.className}")
     }
   }
 }

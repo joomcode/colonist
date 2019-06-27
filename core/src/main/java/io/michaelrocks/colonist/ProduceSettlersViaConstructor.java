@@ -16,13 +16,14 @@
 
 package io.michaelrocks.colonist;
 
-import javax.annotation.Nonnull;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ClassSettlerProducer implements SettlerProducer<Class<?>> {
-  @Nonnull
-  @Override
-  public Class<?> produceSettler(@Nonnull final Class<?> settlerClass) {
-    // This is a marker class. Actual implementation of the producer will be generated.
-    return settlerClass;
-  }
+@Target({ ElementType.TYPE, ElementType.ANNOTATION_TYPE })
+@Retention(RetentionPolicy.CLASS)
+@Documented
+public @interface ProduceSettlersViaConstructor {
 }

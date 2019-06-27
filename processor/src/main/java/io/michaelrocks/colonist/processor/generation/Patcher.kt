@@ -112,11 +112,10 @@ class Patcher(
 
   private fun GeneratorAdapter.produceSettler(colony: Colony, settler: Settler) {
     exhaustive(
-      when (settler.settlerProducer) {
+      when (settler.overriddenSettlerProducer ?: colony.marker.settlerProducer) {
         SettlerProducer.Constructor -> invokeDefaultConstructor(settler.type)
         SettlerProducer.Callback -> invokeProduceCallback(colony, settler)
         SettlerProducer.Class -> push(settler.type)
-        is SettlerProducer.External -> TODO("External producers aren't supported yet")
       }
     )
   }
@@ -146,10 +145,9 @@ class Patcher(
 
   private fun GeneratorAdapter.acceptSettler(colony: Colony, settler: Settler) {
     exhaustive(
-      when (settler.settlerAcceptor) {
+      when (settler.overriddenSettlerAcceptor ?: colony.marker.settlerAcceptor) {
         SettlerAcceptor.None -> pop()
         SettlerAcceptor.Callback -> invokeAcceptCallback(colony, settler)
-        is SettlerAcceptor.External -> TODO("External acceptors aren't supported yet")
       }
     )
   }

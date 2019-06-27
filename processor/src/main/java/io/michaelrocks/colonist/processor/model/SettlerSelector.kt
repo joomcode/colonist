@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package io.michaelrocks.colonist;
+package io.michaelrocks.colonist.processor.model
 
-import javax.annotation.Nonnull;
+import io.michaelrocks.grip.mirrors.Type
 
-public class ConstructorSettlerProducer<S> implements SettlerProducer<S> {
-  @Nonnull
-  @Override
-  public S produceSettler(@Nonnull final Class<?> settlerClass) {
-    // This is a marker class. Actual implementation of the producer will be generated.
-    throw new UnsupportedOperationException();
-  }
+sealed class SettlerSelector {
+  data class Annotation(val annotationType: Type.Object) : SettlerSelector()
+  data class SuperType(val superType: Type.Object) : SettlerSelector()
+  object Registered : SettlerSelector()
 }

@@ -21,11 +21,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import io.michaelrocks.colonist.AcceptSettlersViaCallback;
 import io.michaelrocks.colonist.Colony;
-import io.michaelrocks.colonist.ConstructorSettlerProducer;
+import io.michaelrocks.colonist.ProduceSettlersViaConstructor;
+import io.michaelrocks.colonist.SelectSettlersByAnnotation;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-@Colony(settlerAnnotation = AntSettler.class, defaultSettlerProducer = ConstructorSettlerProducer.class)
+@Colony
+@SelectSettlersByAnnotation(AntSettler.class)
+@ProduceSettlersViaConstructor
+@AcceptSettlersViaCallback
 public @interface AntColony {
 }

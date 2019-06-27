@@ -17,9 +17,15 @@
 package io.michaelrocks.colonist.processor.analysis
 
 import io.michaelrocks.grip.mirrors.AnnotationMirror
+import io.michaelrocks.grip.mirrors.Type
 
 inline fun <reified T : Any> AnnotationMirror.requireValue(name: String): T {
   val value = requireNotNull(values[name]) { "Cannot read value $name from $this" }
   require(value is T) { "Value $name from $this is of type ${value.javaClass} but expected to have type ${T::class.java}" }
   return value
+}
+
+fun AnnotationMirror.requireTypeObjectValue(name: String): Type.Object {
+  val value = requireValue<Type>(name)
+  return value as? Type.Object ?: error("Value $name from $this is ${value.javaClass.simpleName} but expected be a class")
 }

@@ -18,18 +18,18 @@ package io.michaelrocks.colonist.processor.analysis
 
 import io.michaelrocks.colonist.processor.commons.Types
 import io.michaelrocks.colonist.processor.model.SettlerAcceptor
-import io.michaelrocks.grip.mirrors.Type
+import io.michaelrocks.grip.mirrors.AnnotationMirror
 
 interface SettlerAcceptorParser {
-  fun parseSettlerAcceptor(settlerAcceptorType: Type.Object): SettlerAcceptor
+  fun parseSettlerAcceptor(settlerAcceptorAnnotation: AnnotationMirror): SettlerAcceptor
 }
 
 object SettlerAcceptorParserImpl : SettlerAcceptorParser {
-  override fun parseSettlerAcceptor(settlerAcceptorType: Type.Object): SettlerAcceptor {
-    return when (settlerAcceptorType) {
-      Types.NONE_SETTLER_ACCEPTOR -> SettlerAcceptor.Callback
-      Types.CALLBACK_SETTLER_ACCEPTOR -> SettlerAcceptor.Callback
-      else -> SettlerAcceptor.External(settlerAcceptorType)
+  override fun parseSettlerAcceptor(settlerAcceptorAnnotation: AnnotationMirror): SettlerAcceptor {
+    return when (settlerAcceptorAnnotation.type) {
+      Types.ACCEPT_SETTLERS_AND_FORGET_TYPE -> SettlerAcceptor.None
+      Types.ACCEPT_SETTLERS_VIA_CALLBACK_TYPE -> SettlerAcceptor.Callback
+      else -> error("Unsupported settler acceptor annotation @${settlerAcceptorAnnotation.type.className}")
     }
   }
 }
