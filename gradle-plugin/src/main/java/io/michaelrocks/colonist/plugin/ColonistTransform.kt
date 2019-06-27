@@ -85,7 +85,6 @@ class ColonistTransform(private val project: Project) : Transform() {
   override fun getReferencedScopes(): MutableSet<in QualifiedContent.Scope> {
     return EnumSet.of(
       QualifiedContent.Scope.EXTERNAL_LIBRARIES,
-      QualifiedContent.Scope.TESTED_CODE,
       QualifiedContent.Scope.PROVIDED_ONLY
     )
   }
