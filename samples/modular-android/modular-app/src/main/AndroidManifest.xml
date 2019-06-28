@@ -16,14 +16,14 @@
   -->
 
 <manifest
-  package="io.michaelrocks.colonist.modular"
+  package="com.joom.colonist.modular"
   xmlns:android="http://schemas.android.com/apk/res/android">
 
   <application
     android:label="@string/app_name">
 
     <activity
-      android:name="io.michaelrocks.colonist.modular.MainActivity"
+      android:name="com.joom.colonist.modular.MainActivity"
       android:label="@string/app_name">
 
       <intent-filter>

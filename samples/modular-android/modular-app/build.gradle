@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'io.michaelrocks.colonist.android'
+apply plugin: 'com.joom.colonist.android'
 
 def enabledFeatures = project.properties['enabledFeatures']?.toString() ?: ''
 
@@ -9,7 +9,7 @@ android {
   buildToolsVersion androidBuildToolsVersion
 
   defaultConfig {
-    applicationId 'io.michaelrocks.colonist.modular'
+    applicationId 'com.joom.colonist.modular'
     minSdkVersion androidMinSdkVersion
     targetSdkVersion androidTargetSdkVersion
     versionCode 1

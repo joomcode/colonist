@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/MichaelRocks/colonist.svg?branch=develop)](https://travis-ci.org/MichaelRocks/colonist)
-
 Colonist
 ==========
 
@@ -17,17 +15,17 @@ buildscript {
   }
 
   dependencies {
-    classpath 'io.michaelrocks:colonist:colonist-gradle-plugin:0.1.0-alpha2'
+    classpath 'com.joom.colonist:colonist-gradle-plugin:0.1.0-alpha2'
   }
 }
 
 // For Android projects.
 apply plugin: 'com.android.application'
-apply plugin: 'io.michaelrocks.colonist.android'
+apply plugin: 'com.joom.colonist.android'
 
 // For other projects.
 apply plugin: 'java'
-apply plugin: 'io.michaelrocks.colonist'
+apply plugin: 'com.joom.colonist'
 ```
 
 License

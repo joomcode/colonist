@@ -1,11 +1,11 @@
 apply plugin: 'java'
 apply plugin: 'application'
-apply plugin: 'io.michaelrocks.colonist'
+apply plugin: 'com.joom.colonist'
 
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
-mainClassName = 'io.michaelrocks.colonist.sample.ColonistSample'
+mainClassName = 'com.joom.colonist.sample.ColonistSample'
 
 dependencies {
   testImplementation "junit:junit:$junitVersion"

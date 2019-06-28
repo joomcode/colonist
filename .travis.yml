@@ -26,7 +26,7 @@ android:
     - android-29
 
 before_cache:
-  - rm -rf $HOME/.m2/repository/io/michaelrocks.colonist/colonist-
+  - rm -rf $HOME/.m2/repository/com/joom/colonist/colonist-
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
 cache:
