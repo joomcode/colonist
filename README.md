@@ -17,7 +17,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'io.michaelrocks:colonist:colonist-gradle-plugin:0.1.0'
+    classpath 'io.michaelrocks:colonist:colonist-gradle-plugin:0.1.0-alpha2'
   }
 }
 
