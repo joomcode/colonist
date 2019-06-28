@@ -1,0 +1,24 @@
+ext {
+  javaVersion = JavaVersion.VERSION_1_8
+  kotlinVersion = '1.3.40'
+  pabloVersion = '1.0.4'
+
+  jsr305Version = '3.0.2'
+  asmVersion = '7.0'
+  gripVersion = '0.7.0-beta'
+  logbackVersion = '1.2.3'
+
+  junitVersion = '4.12'
+  androidxEspressoVersion = '3.2.0'
+  androidxTestRulesVersion = '1.2.0'
+  androidxTestRunnerVersion = '1.2.0'
+  androidxTestExtJunitVersion = '1.1.1'
+
+  androidCompileSdkVersion = 29
+  androidTargetSdkVersion = 29
+  androidMinSdkVersion = 16
+  androidBuildToolsVersion = '29.0.0'
+  androidToolsVersion = '3.4.1'
+
+  androidxAnnotationVersion = '1.1.0'
+}
