@@ -23,7 +23,7 @@ jar {
 }
 
 shadowJar {
-  relocate 'io.michaelrocks.colonist', 'io.michaelrocks.colonist'
-  relocate 'io.michaelrocks.grip', 'io.michaelrocks.colonist.grip'
-  relocate 'org.objectweb.asm', 'io.michaelrocks.colonist.asm'
+  relocate 'com.joom.colonist', 'com.joom.colonist'
+  relocate 'io.michaelrocks.grip', 'com.joom.colonist.grip'
+  relocate 'org.objectweb.asm', 'com.joom.colonist.asm'
 }

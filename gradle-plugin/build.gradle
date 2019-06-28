@@ -31,10 +31,10 @@ task generateBuildClass {
   outputs.dir generatedDir
 
   doLast {
-    def buildClassFile = new File(generatedJavaSourcesDir, "io/michaelrocks/colonist/plugin/Build.java")
+    def buildClassFile = new File(generatedJavaSourcesDir, "com/joom/colonist/plugin/Build.java")
     buildClassFile.parentFile.mkdirs()
     buildClassFile.text = "" +
-        "package io.michaelrocks.colonist.plugin;\n" +
+        "package com.joom.colonist.plugin;\n" +
         "\n" +
         "public class Build {\n" +
         "    public static final String VERSION = \"$version\";\n" +
@@ -64,7 +64,7 @@ idea {
 }
 
 shadowJar {
-  relocate 'io.michaelrocks.colonist', 'io.michaelrocks.colonist'
+  relocate 'com.joom.colonist', 'com.joom.colonist'
 }
 
 pablo {

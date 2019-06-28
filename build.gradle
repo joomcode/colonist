@@ -6,7 +6,7 @@ buildscript {
 
 allprojects {
   version = '0.1.0-alpha3'
-  group = 'io.michaelrocks.colonist'
+  group = 'com.joom.colonist'
 
   buildscript {
     repositories {
@@ -21,7 +21,7 @@ allprojects {
       classpath "io.michaelrocks.pablo:pablo:$pabloVersion"
 
       if (!rootProject.properties['bootstrap'].toBoolean()) {
-        classpath "io.michaelrocks.colonist:colonist-gradle-plugin:$version"
+        classpath "com.joom.colonist:colonist-gradle-plugin:$version"
       }
     }
   }
