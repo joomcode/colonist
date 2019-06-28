@@ -2,8 +2,8 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'io.michaelrocks.colonist'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
 
 mainClassName = 'io.michaelrocks.colonist.sample.ColonistSample'
 

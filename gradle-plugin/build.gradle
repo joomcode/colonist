@@ -3,8 +3,8 @@ apply plugin: 'kotlin'
 apply plugin: 'idea'
 apply plugin: 'io.michaelrocks.pablo'
 
-targetCompatibility = JavaVersion.VERSION_1_8
-sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = javaVersion
+sourceCompatibility = javaVersion
 
 dependencies {
   relocate project(':processor')

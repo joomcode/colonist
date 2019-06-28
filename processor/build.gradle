@@ -2,8 +2,8 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'io.michaelrocks.pablo'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
 
 dependencies {
   implementation project(':core')

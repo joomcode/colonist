@@ -1,8 +1,8 @@
 apply plugin: 'java-library'
 apply plugin: 'io.michaelrocks.pablo'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
 
 dependencies {
   implementation "com.google.code.findbugs:jsr305:$jsr305Version"

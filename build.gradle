@@ -1,28 +1,10 @@
+buildscript {
+  apply from: 'versions.gradle'
+}
+
 allprojects {
   version = '0.1.0-alpha3'
   group = 'io.michaelrocks.colonist'
-
-  ext.kotlinVersion = '1.3.40'
-  ext.pabloVersion = '1.0.4'
-
-  ext.jsr305Version = '3.0.2'
-  ext.asmVersion = '7.0'
-  ext.gripVersion = '0.7.0-beta'
-  ext.logbackVersion = '1.2.3'
-
-  ext.junitVersion = '4.12'
-  ext.androidxEspressoVersion = '3.2.0'
-  ext.androidxTestRulesVersion = '1.2.0'
-  ext.androidxTestRunnerVersion = '1.2.0'
-  ext.androidxTestExtJunitVersion = '1.1.1'
-
-  ext.androidCompileSdkVersion = 29
-  ext.androidTargetSdkVersion = 29
-  ext.androidMinSdkVersion = 16
-  ext.androidBuildToolsVersion = '29.0.0'
-  ext.androidToolsVersion = '3.4.1'
-
-  ext.androidxAnnotationVersion = '1.1.0'
 
   buildscript {
     repositories {
