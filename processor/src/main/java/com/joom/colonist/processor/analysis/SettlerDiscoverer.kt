@@ -22,10 +22,10 @@ import com.joom.colonist.processor.model.SettlerSelector
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.annotatedWith
 import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.mirrors.ClassMirror
 import io.michaelrocks.grip.mirrors.Type
 import io.michaelrocks.grip.mirrors.isInterface
+import java.io.File
 
 interface SettlerDiscoverer {
   fun discoverSettlers(settlerSelector: SettlerSelector): Collection<Settler>
@@ -33,6 +33,7 @@ interface SettlerDiscoverer {
 
 class SettlerDiscovererImpl(
   private val grip: Grip,
+  private val inputs: List<File>,
   private val settlerParser: SettlerParser
 ) : SettlerDiscoverer {
 
@@ -45,14 +46,14 @@ class SettlerDiscovererImpl(
   }
 
   private fun selectSettlersByAnnotation(annotationType: Type.Object): Collection<Settler> {
-    val query = grip select classes from classpath where annotatedWith(annotationType)
+    val query = grip select classes from inputs where annotatedWith(annotationType)
     return query.execute().classes.map {
       settlerParser.parseSettler(it.type)
     }
   }
 
   private fun selectSettlersBySuperType(superType: Type.Object): Collection<Settler> {
-    val query = grip select classes from classpath where isSubtypeOf(superType)
+    val query = grip select classes from inputs where isSubtypeOf(superType)
     return query.execute().classes.map {
       settlerParser.parseSettler(it.type)
     }
