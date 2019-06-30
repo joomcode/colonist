@@ -39,7 +39,6 @@ import com.joom.colonist.processor.model.SettlerSelector
 import io.michaelrocks.grip.Grip
 import io.michaelrocks.grip.GripFactory
 import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.classpath
 import io.michaelrocks.grip.io.FileSource
 import io.michaelrocks.grip.io.IoFactory
 import io.michaelrocks.grip.mirrors.Annotated
@@ -172,11 +171,11 @@ class ColonistProcessor(
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
       val grip = GripFactory.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
-      val annotationIndex = buildAnnotationIndex(grip)
+      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
       val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
       val colonyParser = ColonyParserImpl(grip, errorReporter)
       val settlerParser = SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
-      val settlerDiscoverer = SettlerDiscovererImpl(grip, settlerParser)
+      val settlerDiscoverer = SettlerDiscovererImpl(grip, parameters.inputs, settlerParser)
 
       ColonistProcessor(
         parameters.inputs,
@@ -192,9 +191,9 @@ class ColonistProcessor(
       }
     }
 
-    private fun buildAnnotationIndex(grip: Grip): AnnotationIndex {
+    private fun buildAnnotationIndex(grip: Grip, inputs: List<File>): AnnotationIndex {
       return AnnotationIndex.build {
-        val query = grip select classes from classpath where annotated()
+        val query = grip select classes from inputs where annotated()
         for (mirror in query.execute().classes) {
           for (annotation in mirror.annotations) {
             addAnnotatedType(mirror.type, annotation.type)
