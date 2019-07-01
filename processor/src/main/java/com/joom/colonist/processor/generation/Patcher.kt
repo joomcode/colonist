@@ -48,10 +48,7 @@ class Patcher(
     val type = getObjectTypeByInternalName(name)
     colonies = colonyTypeToColoniesMap[type]
     colonyType = if (colonies != null) type else null
-    val newInterfaces = if (colonies != null) combineInterfaces(
-      interfaces,
-      Types.COLONY_FOUNDER_TYPE.internalName
-    ) else interfaces
+    val newInterfaces = if (colonies != null) combineInterfaces(interfaces, Types.COLONY_FOUNDER_TYPE.internalName) else interfaces
     super.visit(version, access, name, signature, superName, newInterfaces)
   }
 
@@ -159,7 +156,7 @@ class Patcher(
     val callback = colony.settlerAcceptor!!
     val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
 
-    checkCast(settler.type)
+    checkCast(callback.parameters[0].type)
 
     if (isCallbackStatic) {
       invokeStatic(colony.type, callback.toMethodDescriptor())
