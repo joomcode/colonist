@@ -30,7 +30,8 @@ import com.joom.colonist.processor.analysis.SettlerSelectorParserImpl
 import com.joom.colonist.processor.commons.StandaloneClassWriter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.commons.closeQuietly
-import com.joom.colonist.processor.generation.Patcher
+import com.joom.colonist.processor.generation.ColonyPatcher
+import com.joom.colonist.processor.generation.SettlerPatcher
 import com.joom.colonist.processor.logging.getLogger
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
@@ -42,7 +43,10 @@ import io.michaelrocks.grip.classes
 import io.michaelrocks.grip.io.FileSource
 import io.michaelrocks.grip.io.IoFactory
 import io.michaelrocks.grip.mirrors.Annotated
+import io.michaelrocks.grip.mirrors.Type
+import io.michaelrocks.grip.mirrors.getObjectTypeByInternalName
 import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import java.io.Closeable
 import java.io.File
@@ -136,7 +140,8 @@ class ColonistProcessor(
             val classWriter = StandaloneClassWriter(
               classReader, ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES, grip.classRegistry
             )
-            val classVisitor = Patcher(classWriter, colonyTypeToColoniesMap)
+            val classType = getObjectTypeByInternalName(classReader.className)
+            val classVisitor = createClassVisitorForType(classType, classWriter, colonies, colonyTypeToColoniesMap)
             classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
             fileSink.createFile(path, classWriter.toByteArray())
           }
@@ -150,6 +155,21 @@ class ColonistProcessor(
     }
 
     checkErrors()
+  }
+
+  private fun createClassVisitorForType(
+    type: Type.Object,
+    input: ClassVisitor,
+    colonies: Collection<Colony>,
+    colonyTypeToColoniesMap: Map<Type.Object, Collection<Colony>>
+  ): ClassVisitor {
+    val visitor = colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
+    val isSettler = colonies.find { isSettler(it, type) } != null
+    return if (isSettler) SettlerPatcher(visitor) else visitor
+  }
+
+  private fun isSettler(colony: Colony, type: Type.Object): Boolean {
+    return colony.settlers.find { it.type == type } != null
   }
 
   private fun checkErrors() {

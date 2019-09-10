@@ -31,42 +31,31 @@ import com.joom.colonist.processor.model.SettlerAcceptor
 import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.watermark.WatermarkClassVisitor
 import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.getObjectTypeByInternalName
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-class Patcher(
+class ColonyPatcher(
   private val classVisitor: ClassVisitor,
-  private val colonyTypeToColoniesMap: Map<Type.Object, Collection<Colony>>
+  private val colonies: Collection<Colony>
 ) : WatermarkClassVisitor(classVisitor, false) {
 
-  private var colonies: Collection<Colony>? = null
-  private var colonyType: Type.Object? = null
-
   override fun visit(version: Int, access: Int, name: String, signature: String?, superName: String?, interfaces: Array<String>?) {
-    val type = getObjectTypeByInternalName(name)
-    colonies = colonyTypeToColoniesMap[type]
-    colonyType = if (colonies != null) type else null
-    val newInterfaces = if (colonies != null) combineInterfaces(interfaces, Types.COLONY_FOUNDER_TYPE.internalName) else interfaces
+    val newInterfaces = combineInterfaces(interfaces, Types.COLONY_FOUNDER_TYPE.internalName)
     super.visit(version, access, name, signature, superName, newInterfaces)
   }
 
   override fun visitMethod(access: Int, name: String, descriptor: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
-    if (colonies != null) {
-      if (name == FOUND_METHOD.name && descriptor == FOUND_METHOD.descriptor) {
-        return null
-      }
+    if (name == FOUND_METHOD.name && descriptor == FOUND_METHOD.descriptor) {
+      return null
     }
 
     return super.visitMethod(access, name, descriptor, signature, exceptions)
   }
 
   override fun visitEnd() {
-    colonies?.also { colonies ->
-      val methods = composeColonyMethods(colonies)
-      generateColonyFounderMethods(methods)
-    }
+    val methods = composeColonyMethods(colonies)
+    generateColonyFounderMethods(methods)
 
     super.visitEnd()
   }

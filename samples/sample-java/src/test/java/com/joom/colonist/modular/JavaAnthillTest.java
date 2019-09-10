@@ -44,7 +44,7 @@ public class JavaAnthillTest {
 
   @Test
   public void testAnthillIsProcessed() {
-    final String[] ants = { "Bala", "Chip", "Muffy", "Weaver", "Z" };
+    final String[] ants = { "Bala", "Chip", "Muffy", "Weaver", "Z", "Queen" };
     new Anthill();
 
     final String output = new String(stream.toByteArray(), Charset.forName("UTF-8"));
