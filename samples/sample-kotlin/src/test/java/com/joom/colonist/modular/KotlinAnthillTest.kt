@@ -39,7 +39,7 @@ class KotlinAnthillTest {
 
   @Test
   fun testAnthillIsProcessed() {
-    val ants = arrayOf("Bala", "Chip", "Muffy", "Weaver", "Z")
+    val ants = arrayOf("Bala", "Chip", "Muffy", "Weaver", "Z", "Queen")
     Anthill()
 
     val output = stream.toByteArray().toString(Charsets.UTF_8)
