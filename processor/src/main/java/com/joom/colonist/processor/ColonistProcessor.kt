@@ -164,12 +164,12 @@ class ColonistProcessor(
     colonyTypeToColoniesMap: Map<Type.Object, Collection<Colony>>
   ): ClassVisitor {
     val visitor = colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
-    val isSettler = colonies.find { isSettler(it, type) } != null
+    val isSettler = colonies.any { isSettler(it, type) }
     return if (isSettler) SettlerPatcher(visitor) else visitor
   }
 
   private fun isSettler(colony: Colony, type: Type.Object): Boolean {
-    return colony.settlers.find { it.type == type } != null
+    return colony.settlers.any { it.type == type }
   }
 
   private fun checkErrors() {
