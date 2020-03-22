@@ -81,7 +81,7 @@ class ColonyPatcher(
       for (method in methods) {
         loadArg(0)
         push(method.colony.marker.type)
-        ifCmp(Types.CLASS_TYPE, GeneratorAdapter.NE) {
+        ifCmp(Types.CLASS_TYPE, GeneratorAdapter.EQ) {
           loadThis()
           invokePrivate(method.colony.type, method.method)
           returnValue()
