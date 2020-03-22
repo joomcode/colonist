@@ -1,10 +1,10 @@
 ext {
   javaVersion = JavaVersion.VERSION_1_8
-  kotlinVersion = '1.3.40'
+  kotlinVersion = '1.3.70'
   pabloVersion = '1.0.4'
 
   jsr305Version = '3.0.2'
-  asmVersion = '7.0'
+  asmVersion = '7.3.1'
   gripVersion = '0.7.0-beta'
   logbackVersion = '1.2.3'
 
@@ -17,8 +17,8 @@ ext {
   androidCompileSdkVersion = 29
   androidTargetSdkVersion = 29
   androidMinSdkVersion = 16
-  androidBuildToolsVersion = '29.0.0'
-  androidToolsVersion = '3.4.1'
+  androidBuildToolsVersion = '29.0.3'
+  androidToolsVersion = '3.6.1'
 
   androidxAnnotationVersion = '1.1.0'
 }
