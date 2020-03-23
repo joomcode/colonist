@@ -1,6 +1,6 @@
 ext {
   javaVersion = JavaVersion.VERSION_1_8
-  kotlinVersion = '1.3.70'
+  kotlinVersion = '1.3.71'
   pabloVersion = '1.0.4'
 
   jsr305Version = '3.0.2'
