@@ -34,7 +34,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.joom.colonist:colonist-gradle-plugin:0.1.0-alpha6'
+    classpath 'com.joom.colonist:colonist-gradle-plugin:0.1.0-alpha7'
   }
 }
 

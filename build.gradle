@@ -3,7 +3,7 @@ buildscript {
 }
 
 allprojects {
-  version = '0.1.0-alpha6'
+  version = '0.1.0-alpha7'
   group = 'com.joom.colonist'
 
   buildscript {
