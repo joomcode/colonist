@@ -1,3 +1,5 @@
+![Build](https://github.com/joomcode/colonist/workflows/Build/badge.svg)
+
 Colonist
 ========
 
