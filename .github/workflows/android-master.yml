@@ -36,3 +36,8 @@ jobs:
             ./gradlew connectedCheck --no-daemon
             ./gradlew connectedCheck -PenabledFeatures=feature2 --no-daemon
             ./gradlew connectedCheck -PenabledFeatures= --no-daemon
+
+      - name: Publish to Bintray
+        if: contains(github.ref, '/tags/v')
+        run: |
+          ./gradlew bintrayUpload -PbintrayUser=${{ secrets.BINTRAY_USER }} -PbintrayKey=${{ secrets.BINTRAY_KEY }}
