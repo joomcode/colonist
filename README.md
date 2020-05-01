@@ -1,4 +1,4 @@
-![Build](https://github.com/joomcode/colonist/workflows/Build/badge.svg)
+[![Build](https://github.com/joomcode/colonist/workflows/Build/badge.svg)](https://github.com/joomcode/colonist/actions)
 
 Colonist
 ========
