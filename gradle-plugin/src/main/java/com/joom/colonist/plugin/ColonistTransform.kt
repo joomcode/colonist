@@ -92,4 +92,8 @@ class ColonistTransform(private val project: Project) : Transform() {
   override fun isIncremental(): Boolean {
     return false
   }
+
+  override fun isCacheable(): Boolean {
+    return false
+  }
 }
