@@ -65,7 +65,3 @@ idea {
 shadowJar {
   relocate 'com.joom.colonist', 'com.joom.colonist'
 }
-
-pablo {
-  repackage true
-}
