@@ -30,7 +30,7 @@ The library is experimental. Its API isn't stable yet and may change dramaticall
 ```groovy
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
   }
 
   dependencies {

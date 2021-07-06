@@ -1,0 +1,34 @@
+apply plugin: 'io.michaelrocks.pablo'
+
+pablo {
+  pom {
+    name = 'Colonist'
+    description = 'Compile time class discovery framework for JVM languages.'
+    inceptionYear = '2019'
+    url = 'https://github.com/joomcode/colonist'
+
+    licenses {
+      license {
+        name = 'The Apache License, Version 2.0'
+        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+        distribution = 'repo'
+      }
+    }
+    organization {
+      name = 'Joom'
+      url = 'https://joom.com'
+    }
+    developers {
+      developer {
+        id = 'MichaelRocks'
+        name = 'Michael Rozumyanskiy'
+        email = 'michael.rozumyanskiy@gmail.com'
+      }
+    }
+    scm {
+      connection = 'scm:git:git://github.com/joomcode/colonist.git'
+      developerConnection = 'scm:git:ssh://git@github.com/joomcode/colonist.git'
+      url = 'https://github.com/joomcode/colonist'
+    }
+  }
+}

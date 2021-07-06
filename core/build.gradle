@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
-apply plugin: 'io.michaelrocks.pablo'
+apply from: "$rootDir/pablo.gradle"
 
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
