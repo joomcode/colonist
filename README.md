@@ -34,7 +34,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.joom.colonist:colonist-gradle-plugin:0.1.0-alpha9'
+    classpath 'com.joom.colonist:colonist-gradle-plugin:0.1.0-alpha10'
   }
 }
 
@@ -162,7 +162,7 @@ Initialize Plugin2
 License
 -------
 
-    Copyright 2020 SIA Joom
+    Copyright 2021 SIA Joom
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
