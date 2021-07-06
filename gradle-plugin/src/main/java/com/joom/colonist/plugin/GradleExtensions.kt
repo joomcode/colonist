@@ -19,7 +19,7 @@ package com.joom.colonist.plugin
 import com.android.build.gradle.BaseExtension
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskContainer
@@ -27,8 +27,8 @@ import org.gradle.api.tasks.compile.JavaCompile
 
 val Project.sourceSets: SourceSetContainer
   get() {
-    val javaConvention = convention.getPlugin(JavaPluginConvention::class.java) as JavaPluginConvention
-    return javaConvention.sourceSets
+    val extension = extensions.getByType(JavaPluginExtension::class.java)
+    return extension.sourceSets
   }
 
 val Project.hasAndroid: Boolean
