@@ -6,9 +6,9 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACC_PRIVATE
 import org.objectweb.asm.Opcodes.ACC_PROTECTED
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
-import org.objectweb.asm.Opcodes.ASM5
+import org.objectweb.asm.Opcodes.ASM9
 
-class SettlerPatcher(classVisitor: ClassVisitor) : ClassVisitor(ASM5, classVisitor) {
+class SettlerPatcher(classVisitor: ClassVisitor) : ClassVisitor(ASM9, classVisitor) {
 
   override fun visit(version: Int, access: Int, name: String, signature: String?, superName: String?, interfaces: Array<String>?) {
     val newAccess = makeAccessPublic(access)

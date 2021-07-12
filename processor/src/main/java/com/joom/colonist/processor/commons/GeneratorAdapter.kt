@@ -27,7 +27,7 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACONST_NULL
-import org.objectweb.asm.Opcodes.ASM5
+import org.objectweb.asm.Opcodes.ASM9
 import org.objectweb.asm.Opcodes.DOUBLE
 import org.objectweb.asm.Opcodes.FLOAT
 import org.objectweb.asm.Opcodes.INTEGER
@@ -45,7 +45,7 @@ class GeneratorAdapter(
   access: Int,
   name: String,
   desc: String
-) : AsmGeneratorAdapter(ASM5, methodVisitor, access, name, desc) {
+) : AsmGeneratorAdapter(ASM9, methodVisitor, access, name, desc) {
 
   constructor(
     methodVisitor: MethodVisitor,

@@ -23,7 +23,7 @@ import org.objectweb.asm.Opcodes
 open class WatermarkClassVisitor(
   classVisitor: ClassVisitor,
   private val isDirtyByDefault: Boolean
-) : ClassVisitor(Opcodes.ASM5, classVisitor) {
+) : ClassVisitor(Opcodes.ASM9, classVisitor) {
 
   var isDirty: Boolean = false
   private var isAttributeAdded: Boolean = false

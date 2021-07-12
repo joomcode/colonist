@@ -24,7 +24,7 @@ import org.objectweb.asm.Opcodes
 import java.io.File
 import java.io.IOException
 
-class WatermarkChecker : ClassVisitor(Opcodes.ASM5) {
+class WatermarkChecker : ClassVisitor(Opcodes.ASM9) {
   var isColonistClass: Boolean = false
     private set
 
