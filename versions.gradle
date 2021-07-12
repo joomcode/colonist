@@ -5,7 +5,7 @@ ext {
 
   jsr305Version = '3.0.2'
   asmVersion = '9.2'
-  gripVersion = '0.7.1-beta'
+  gripVersion = '0.7.2-beta'
   logbackVersion = '1.2.3'
 
   junitVersion = '4.13.2'

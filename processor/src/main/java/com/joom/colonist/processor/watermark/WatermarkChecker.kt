@@ -16,7 +16,6 @@
 
 package com.joom.colonist.processor.watermark
 
-import io.michaelrocks.grip.io.readBytes
 import org.objectweb.asm.Attribute
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
