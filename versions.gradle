@@ -1,23 +1,23 @@
 ext {
   javaVersion = JavaVersion.VERSION_1_8
   kotlinVersion = '1.5.20'
-  pabloVersion = '1.2.0'
+  pabloVersion = '1.3.1'
 
   jsr305Version = '3.0.2'
-  asmVersion = '9.1'
+  asmVersion = '9.2'
   gripVersion = '0.7.1-beta'
   logbackVersion = '1.2.3'
 
   junitVersion = '4.13.2'
-  androidxEspressoVersion = '3.3.0'
-  androidxTestRulesVersion = '1.3.0'
-  androidxTestRunnerVersion = '1.3.0'
-  androidxTestExtJunitVersion = '1.1.2'
+  androidxEspressoVersion = '3.4.0'
+  androidxTestRulesVersion = '1.4.0'
+  androidxTestRunnerVersion = '1.4.0'
+  androidxTestExtJunitVersion = '1.1.3'
 
   androidCompileSdkVersion = 30
   androidTargetSdkVersion = 30
   androidMinSdkVersion = 16
-  androidBuildToolsVersion = '30.0.2'
+  androidBuildToolsVersion = '30.0.3'
   androidToolsVersion = '4.2.1'
 
   androidxAnnotationVersion = '1.2.0'
