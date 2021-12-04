@@ -16,7 +16,7 @@
 
 package com.joom.colonist.processor.model
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 
 data class ColonyMarker(
   val type: Type.Object,

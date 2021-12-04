@@ -17,8 +17,8 @@
 package com.joom.colonist.processor.analysis
 
 import com.joom.colonist.processor.model.Settler
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.Grip
+import com.joom.grip.mirrors.Type
 
 interface SettlerParser {
   fun parseSettler(settlerType: Type.Object): Settler

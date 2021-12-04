@@ -19,12 +19,12 @@ package com.joom.colonist.processor.analysis
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerSelector
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.annotatedWith
-import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.isInterface
+import com.joom.grip.Grip
+import com.joom.grip.annotatedWith
+import com.joom.grip.classes
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.isInterface
 import java.io.File
 
 interface SettlerDiscoverer {

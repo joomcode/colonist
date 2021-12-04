@@ -28,7 +28,7 @@ import com.joom.colonist.SelectSettlersByAnnotation
 import com.joom.colonist.SelectSettlersBySuperType
 import com.joom.colonist.SelectSettlersWithRegisteredSelector
 import com.joom.colonist.internal.ColonyFounder
-import io.michaelrocks.grip.mirrors.getObjectType
+import com.joom.grip.mirrors.getObjectType
 
 object Types {
   val OBJECT_TYPE = getObjectType<Any>()

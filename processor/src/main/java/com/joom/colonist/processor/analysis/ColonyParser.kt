@@ -23,10 +23,10 @@ import com.joom.colonist.processor.model.ColonyMarker
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerAcceptor
 import com.joom.colonist.processor.model.SettlerProducer
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.Grip
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.Type
 
 interface ColonyParser {
   fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker, settlers: Collection<Settler>): Colony

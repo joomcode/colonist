@@ -17,13 +17,12 @@
 package com.joom.colonist.processor.commons
 
 import com.joom.colonist.processor.logging.getLogger
-import io.michaelrocks.grip.ClassRegistry
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.getObjectTypeByInternalName
+import com.joom.grip.ClassRegistry
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getObjectTypeByInternalName
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
-import java.util.HashSet
 
 class StandaloneClassWriter : ClassWriter {
   private val logger = getLogger()

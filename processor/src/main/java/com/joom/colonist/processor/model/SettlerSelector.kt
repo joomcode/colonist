@@ -16,7 +16,7 @@
 
 package com.joom.colonist.processor.model
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 
 sealed class SettlerSelector {
   data class Annotation(val annotationType: Type.Object) : SettlerSelector()

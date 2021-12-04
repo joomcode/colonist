@@ -16,7 +16,7 @@
 
 package com.joom.colonist.processor.analysis
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 
 class SimpleAnnotationIndex(
   private val annotationTypeToTypeCollectionMap: Map<Type.Object, Collection<Type.Object>>

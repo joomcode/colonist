@@ -37,14 +37,14 @@ import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerSelector
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.GripFactory
-import io.michaelrocks.grip.classes
-import io.michaelrocks.grip.io.FileSource
-import io.michaelrocks.grip.io.IoFactory
-import io.michaelrocks.grip.mirrors.Annotated
-import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.getObjectTypeByInternalName
+import com.joom.grip.Grip
+import com.joom.grip.GripFactory
+import com.joom.grip.classes
+import com.joom.grip.io.FileSource
+import com.joom.grip.io.IoFactory
+import com.joom.grip.mirrors.Annotated
+import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getObjectTypeByInternalName
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -190,7 +190,7 @@ class ColonistProcessor(
   companion object {
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
-      val grip = GripFactory.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+      val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
       val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
       val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
       val colonyParser = ColonyParserImpl(grip, errorReporter)

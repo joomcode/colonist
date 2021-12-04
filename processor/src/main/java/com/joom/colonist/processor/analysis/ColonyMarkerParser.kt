@@ -17,8 +17,8 @@
 package com.joom.colonist.processor.analysis
 
 import com.joom.colonist.processor.model.ColonyMarker
-import io.michaelrocks.grip.Grip
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.Grip
+import com.joom.grip.mirrors.Type
 
 interface ColonyMarkerParser {
   fun parseColonyMarker(colonyAnnotationType: Type.Object): ColonyMarker

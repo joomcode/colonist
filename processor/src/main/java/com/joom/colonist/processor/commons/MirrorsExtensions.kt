@@ -18,8 +18,8 @@ package com.joom.colonist.processor.commons
 
 import com.joom.colonist.processor.descriptors.FieldDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
-import io.michaelrocks.grip.mirrors.FieldMirror
-import io.michaelrocks.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.FieldMirror
+import com.joom.grip.mirrors.MethodMirror
 
 fun MethodMirror.toMethodDescriptor(): MethodDescriptor {
   return MethodDescriptor(name, type)

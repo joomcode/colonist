@@ -20,9 +20,9 @@ import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.SettlerAcceptor
 import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.model.SettlerSelector
-import io.michaelrocks.grip.mirrors.AnnotationMirror
-import io.michaelrocks.grip.mirrors.ClassMirror
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.AnnotationMirror
+import com.joom.grip.mirrors.ClassMirror
+import com.joom.grip.mirrors.Type
 
 private val SETTLER_SELECTOR_ANNOTATION_TYPES = listOf(
   Types.SELECT_SETTLERS_BY_ANNOTATION_TYPE,

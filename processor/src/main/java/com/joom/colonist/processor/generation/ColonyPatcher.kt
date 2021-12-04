@@ -30,7 +30,7 @@ import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerAcceptor
 import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.watermark.WatermarkClassVisitor
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes

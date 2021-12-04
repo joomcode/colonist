@@ -16,8 +16,8 @@
 
 package com.joom.colonist.processor.descriptors
 
-import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.getType
+import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getType
 
 fun FieldDescriptor(name: String, desc: String): FieldDescriptor =
   FieldDescriptor(name, getType(desc))

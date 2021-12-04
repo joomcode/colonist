@@ -16,8 +16,8 @@
 
 package com.joom.colonist.processor.model
 
-import io.michaelrocks.grip.mirrors.MethodMirror
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.MethodMirror
+import com.joom.grip.mirrors.Type
 
 data class Colony(
   val type: Type.Object,

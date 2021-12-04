@@ -16,8 +16,8 @@
 
 package com.joom.colonist.processor.analysis
 
-import io.michaelrocks.grip.mirrors.AnnotationMirror
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.AnnotationMirror
+import com.joom.grip.mirrors.Type
 
 inline fun <reified T : Any> AnnotationMirror.requireValue(name: String): T {
   val value = requireNotNull(values[name]) { "Cannot read value $name from $this" }

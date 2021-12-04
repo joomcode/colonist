@@ -16,8 +16,8 @@
 
 package com.joom.colonist.processor.descriptors
 
-import io.michaelrocks.grip.mirrors.Type
-import io.michaelrocks.grip.mirrors.getMethodType
+import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getMethodType
 import org.objectweb.asm.Type as AsmType
 
 private val DEFAULT_CONSTRUCTOR_DESCRIPTOR = AsmType.getMethodDescriptor(AsmType.VOID_TYPE)

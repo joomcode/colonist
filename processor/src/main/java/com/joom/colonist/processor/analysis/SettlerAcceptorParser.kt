@@ -18,7 +18,7 @@ package com.joom.colonist.processor.analysis
 
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.SettlerAcceptor
-import io.michaelrocks.grip.mirrors.AnnotationMirror
+import com.joom.grip.mirrors.AnnotationMirror
 
 interface SettlerAcceptorParser {
   fun parseSettlerAcceptor(settlerAcceptorAnnotation: AnnotationMirror): SettlerAcceptor

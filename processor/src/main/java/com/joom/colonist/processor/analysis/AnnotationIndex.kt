@@ -16,7 +16,7 @@
 
 package com.joom.colonist.processor.analysis
 
-import io.michaelrocks.grip.mirrors.Type
+import com.joom.grip.mirrors.Type
 
 interface AnnotationIndex {
   fun findClassesWithAnnotation(annotationType: Type.Object): Collection<Type.Object>
