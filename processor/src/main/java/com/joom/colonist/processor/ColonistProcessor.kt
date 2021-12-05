@@ -130,7 +130,7 @@ class ColonistProcessor(
 
   private fun copyAndPatchClasses(colonies: Collection<Colony>) {
     val colonyTypeToColoniesMap = colonies.groupBy { it.type }
-    fileSourcesAndSinks.forEach { (fileSource, fileSink) ->
+    fileSourcesAndSinks.parallelStream().forEach { (fileSource, fileSink) ->
       logger.debug("Copy from {} to {}", fileSource, fileSink)
       fileSource.listFiles { path, type ->
         logger.debug("Copy file {} of type {}", path, type)
