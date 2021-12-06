@@ -50,6 +50,8 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import java.io.Closeable
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.streams.toList
 
 class ColonistProcessor(
   inputs: List<File>,
@@ -102,14 +104,17 @@ class ColonistProcessor(
   }
 
   private fun findSettlersForColonyMarkers(colonyMarkers: Collection<ColonyMarker>): Collection<ColonyMarkerWithSettlers> {
-    val cache = HashMap<SettlerSelector, Collection<Settler>>()
-    return colonyMarkers.map { marker ->
-      val selector = marker.settlerSelector
-      val settlers = cache.getOrPut(selector) {
-        settlerDiscoverer.discoverSettlers(selector)
+    val cache = ConcurrentHashMap<SettlerSelector, Collection<Settler>>()
+    return colonyMarkers
+      .parallelStream()
+      .map { marker ->
+        val selector = marker.settlerSelector
+        val settlers = cache.computeIfAbsent(selector) {
+          settlerDiscoverer.discoverSettlers(selector)
+        }
+        ColonyMarkerWithSettlers(marker, settlers)
       }
-      ColonyMarkerWithSettlers(marker, settlers)
-    }
+      .toList()
   }
 
   private fun findColonies(colonyMarkersWithSettlers: Collection<ColonyMarkerWithSettlers>): Collection<Colony> {
@@ -191,6 +196,9 @@ class ColonistProcessor(
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
       val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+
+      warmUpGripCaches(grip, parameters.inputs)
+
       val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
       val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
       val colonyParser = ColonyParserImpl(grip, errorReporter)
@@ -209,6 +217,13 @@ class ColonistProcessor(
       ).use {
         it.processClasses()
       }
+    }
+
+    private fun warmUpGripCaches(grip: Grip, inputs: List<File>) {
+      inputs.flatMap { grip.fileRegistry.findTypesForFile(it) }
+        .parallelStream()
+        .map { grip.classRegistry.getClassMirror(it) }
+        .toList()
     }
 
     private fun buildAnnotationIndex(grip: Grip, inputs: List<File>): AnnotationIndex {
