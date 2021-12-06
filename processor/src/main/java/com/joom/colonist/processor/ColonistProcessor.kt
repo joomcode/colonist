@@ -50,6 +50,8 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import java.io.Closeable
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.streams.toList
 
 class ColonistProcessor(
   inputs: List<File>,
@@ -102,14 +104,17 @@ class ColonistProcessor(
   }
 
   private fun findSettlersForColonyMarkers(colonyMarkers: Collection<ColonyMarker>): Collection<ColonyMarkerWithSettlers> {
-    val cache = HashMap<SettlerSelector, Collection<Settler>>()
-    return colonyMarkers.map { marker ->
-      val selector = marker.settlerSelector
-      val settlers = cache.getOrPut(selector) {
-        settlerDiscoverer.discoverSettlers(selector)
+    val cache = ConcurrentHashMap<SettlerSelector, Collection<Settler>>()
+    return colonyMarkers
+      .parallelStream()
+      .map { marker ->
+        val selector = marker.settlerSelector
+        val settlers = cache.computeIfAbsent(selector) {
+          settlerDiscoverer.discoverSettlers(selector)
+        }
+        ColonyMarkerWithSettlers(marker, settlers)
       }
-      ColonyMarkerWithSettlers(marker, settlers)
-    }
+      .toList()
   }
 
   private fun findColonies(colonyMarkersWithSettlers: Collection<ColonyMarkerWithSettlers>): Collection<Colony> {
