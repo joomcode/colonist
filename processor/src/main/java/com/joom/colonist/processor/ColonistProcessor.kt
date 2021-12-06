@@ -196,6 +196,9 @@ class ColonistProcessor(
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
       val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+
+      warmUpGripCaches(grip, parameters.inputs)
+
       val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
       val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
       val colonyParser = ColonyParserImpl(grip, errorReporter)
@@ -214,6 +217,13 @@ class ColonistProcessor(
       ).use {
         it.processClasses()
       }
+    }
+
+    private fun warmUpGripCaches(grip: Grip, inputs: List<File>) {
+      inputs.flatMap { grip.fileRegistry.findTypesForFile(it) }
+        .parallelStream()
+        .map { grip.classRegistry.getClassMirror(it) }
+        .toList()
     }
 
     private fun buildAnnotationIndex(grip: Grip, inputs: List<File>): AnnotationIndex {
