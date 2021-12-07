@@ -24,12 +24,11 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   override fun apply(project: Project) {
     super.apply(project)
 
-    if (project.hasAndroid) {
-      @Suppress("UnstableApiUsage")
-      addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
-      project.android.registerTransform(ColonistTransform(project))
-    } else {
+    if (!project.hasAndroid) {
       throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
     }
+
+    addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+    project.android.registerTransform(ColonistTransform(project))
   }
 }
