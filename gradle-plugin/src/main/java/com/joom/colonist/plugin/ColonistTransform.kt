@@ -25,12 +25,10 @@ import com.android.build.api.transform.TransformInvocation
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.logging.getLogger
-import org.gradle.api.Project
 import java.io.IOException
 import java.util.EnumSet
 
 class ColonistTransform(
-  private val project: Project,
   private val extension: AndroidColonistExtension
 ) : Transform() {
   private val logger = getLogger()
@@ -52,7 +50,7 @@ class ColonistTransform(
       classpath = invocation.referencedInputs.flatMap { input ->
         input.jarInputs.map { it.file } + input.directoryInputs.map { it.file }
       },
-      bootClasspath = project.android.bootClasspath,
+      bootClasspath = extension.bootClasspath,
       projectName = invocation.context.variantName,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled
@@ -80,7 +78,11 @@ class ColonistTransform(
 
   override fun getParameterInputs(): MutableMap<String, Any> {
     return mutableMapOf(
-      "cacheable" to extension.cacheable
+      "cacheable" to extension.cacheable,
+      "bootClasspath" to extension.bootClasspath
+        .map { it.absolutePath }
+        .sorted()
+        .joinToString()
     )
   }
 

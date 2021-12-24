@@ -29,9 +29,13 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     }
 
     val extension = project.extensions.create("colonist", AndroidColonistExtension::class.java)
-    val transform = ColonistTransform(project, extension)
+    val transform = ColonistTransform(extension)
 
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
     project.android.registerTransform(transform)
+
+    project.afterEvaluate {
+      extension.bootClasspath = project.android.bootClasspath
+    }
   }
 }
