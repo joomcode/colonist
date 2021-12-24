@@ -28,7 +28,10 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
     }
 
+    val extension = project.extensions.create("colonist", AndroidColonistExtension::class.java)
+    val transform = ColonistTransform(project, extension)
+
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
-    project.android.registerTransform(ColonistTransform(project))
+    project.android.registerTransform(transform)
   }
 }
