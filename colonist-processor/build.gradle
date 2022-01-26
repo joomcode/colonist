@@ -6,7 +6,7 @@ sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
 dependencies {
-  implementation project(':core')
+  implementation project(':colonist-core')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   implementation "ch.qos.logback:logback-classic:$logbackVersion"
 
@@ -22,6 +22,8 @@ jar {
 }
 
 pablo {
+  artifactName = "colonist-processor"
+
   shadow {
     relocate 'com.joom.colonist'
     relocate 'com.joom.grip', 'com.joom.colonist.grip'

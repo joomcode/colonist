@@ -1,24 +1,33 @@
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.joom.colonist.android'
+
+def enabledFeatures = project.properties['enabledFeatures']?.toString() ?: ''
 
 android {
   compileSdkVersion androidCompileSdkVersion
   buildToolsVersion androidBuildToolsVersion
 
   defaultConfig {
+    applicationId 'com.joom.colonist.modular'
     minSdkVersion androidMinSdkVersion
     targetSdkVersion androidTargetSdkVersion
     versionCode 1
     versionName version
+
+    buildConfigField 'String', 'ENABLED_FEATURES', "\"$enabledFeatures\""
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
 }
 
 dependencies {
-  implementation project(':samples:modular-android:modular-api')
+  implementation project(':colonist-samples:modular-android:modular-api')
+  for (feature in enabledFeatures.tokenize(',')) {
+    implementation project(":colonist-samples:modular-android:modular-$feature")
+  }
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
 
   testImplementation "junit:junit:$junitVersion"
 

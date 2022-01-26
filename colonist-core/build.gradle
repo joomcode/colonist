@@ -14,3 +14,7 @@ dependencies {
 jar {
   destinationDirectory.set(file('build/jar'))
 }
+
+pablo {
+  artifactName = "colonist-core"
+}

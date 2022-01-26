@@ -7,7 +7,7 @@ targetCompatibility = javaVersion
 sourceCompatibility = javaVersion
 
 dependencies {
-  relocate project(':processor')
+  relocate project(':colonist-processor')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
@@ -33,11 +33,11 @@ task generateBuildClass {
     def buildClassFile = new File(generatedJavaSourcesDir, "com/joom/colonist/plugin/Build.java")
     buildClassFile.parentFile.mkdirs()
     buildClassFile.text = "" +
-        "package com.joom.colonist.plugin;\n" +
-        "\n" +
-        "public class Build {\n" +
-        "    public static final String VERSION = \"$version\";\n" +
-        "}\n"
+      "package com.joom.colonist.plugin;\n" +
+      "\n" +
+      "public class Build {\n" +
+      "    public static final String VERSION = \"$version\";\n" +
+      "}\n"
   }
 }
 
@@ -63,6 +63,8 @@ idea {
 }
 
 pablo {
+  artifactName = "colonist-gradle-plugin"
+
   shadow {
     relocate 'com.joom.colonist'
   }

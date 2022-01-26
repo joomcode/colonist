@@ -16,20 +16,19 @@
 
 rootProject.name = 'colonist'
 
-include ':core'
-include ':processor'
-
-include ':gradle-plugin'
+include ':colonist-core'
+include ':colonist-gradle-plugin'
+include ':colonist-processor'
 
 if (!properties['bootstrap'].toBoolean()) {
-  include ':samples:sample-java'
-  include ':samples:sample-kotlin'
-  include ':samples:modular-android:modular-api'
-  include ':samples:modular-android:modular-app'
+  include ':colonist-samples:sample-java'
+  include ':colonist-samples:sample-kotlin'
+  include ':colonist-samples:modular-android:modular-api'
+  include ':colonist-samples:modular-android:modular-app'
 
   def featuresString = properties['enabledFeatures']?.toString() ?: ""
   def features = featuresString.tokenize(",")
   for (feature in features) {
-    include ":samples:modular-android:modular-$feature"
+    include ":colonist-samples:modular-android:modular-$feature"
   }
 }
