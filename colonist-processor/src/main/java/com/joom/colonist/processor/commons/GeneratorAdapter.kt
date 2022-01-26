@@ -283,6 +283,8 @@ class GeneratorAdapter(
                 objects.add(DOUBLE)
                 objects.add(TOP)
               }
+
+              Type.Primitive.Void -> Unit
             }
           }
 
