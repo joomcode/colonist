@@ -32,13 +32,17 @@ import java.io.File
 open class ColonistTask : DefaultTask() {
   @InputFiles
   var backupDirs: List<File> = emptyList()
+
   @OutputDirectories
   var classesDirs: List<File> = emptyList()
+
   @OutputDirectory
   var sourceDir: File? = null
+
   @InputFiles
   @Classpath
   var classpath: List<File> = emptyList()
+
   @InputFiles
   @Classpath
   var bootClasspath: List<File> = emptyList()

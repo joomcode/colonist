@@ -27,5 +27,6 @@ inline fun <reified T : Any> AnnotationMirror.requireValue(name: String): T {
 
 fun AnnotationMirror.requireTypeObjectValue(name: String): Type.Object {
   val value = requireValue<Type>(name)
-  return value as? Type.Object ?: error("Value $name from $this is ${value.javaClass.simpleName} but expected be a class")
+  return value as? Type.Object
+    ?: error("Value $name from $this is ${value.javaClass.simpleName} but expected be a class")
 }

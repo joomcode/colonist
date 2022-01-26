@@ -16,15 +16,14 @@
 
 package com.joom.colonist.modular;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
@@ -44,7 +43,7 @@ public class JavaAnthillTest {
 
   @Test
   public void testAnthillIsProcessed() {
-    final String[] ants = { "Bala", "Chip", "Muffy", "Weaver", "Z", "Queen" };
+    final String[] ants = {"Bala", "Chip", "Muffy", "Weaver", "Z", "Queen"};
     new Anthill();
 
     final String output = new String(stream.toByteArray(), Charset.forName("UTF-8"));

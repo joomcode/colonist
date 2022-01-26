@@ -16,8 +16,6 @@
 
 package com.joom.colonist.processor
 
-import java.util.ArrayList
-
 class ErrorReporter {
   private val errors = ArrayList<Exception>()
 

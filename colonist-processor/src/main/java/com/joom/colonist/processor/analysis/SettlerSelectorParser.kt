@@ -27,10 +27,21 @@ interface SettlerSelectorParser {
 object SettlerSelectorParserImpl : SettlerSelectorParser {
   override fun parseSettlerSelector(settlerSelectorAnnotation: AnnotationMirror): SettlerSelector {
     return when (settlerSelectorAnnotation.type) {
-      Types.SELECT_SETTLERS_BY_ANNOTATION_TYPE -> SettlerSelector.Annotation(settlerSelectorAnnotation.requireTypeObjectValue("value"))
-      Types.SELECT_SETTLERS_BY_SUPER_TYPE_TYPE -> SettlerSelector.SuperType(settlerSelectorAnnotation.requireTypeObjectValue("value"))
-      Types.SELECT_SETTLERS_WITH_REGISTERED_SELECTOR_TYPE -> SettlerSelector.Registered
-      else -> error("Unsupported settler selector annotation @${settlerSelectorAnnotation.type.className}")
+      Types.SELECT_SETTLERS_BY_ANNOTATION_TYPE -> {
+        SettlerSelector.Annotation(settlerSelectorAnnotation.requireTypeObjectValue("value"))
+      }
+
+      Types.SELECT_SETTLERS_BY_SUPER_TYPE_TYPE -> {
+        SettlerSelector.SuperType(settlerSelectorAnnotation.requireTypeObjectValue("value"))
+      }
+
+      Types.SELECT_SETTLERS_WITH_REGISTERED_SELECTOR_TYPE -> {
+        SettlerSelector.Registered
+      }
+
+      else -> {
+        error("Unsupported settler selector annotation @${settlerSelectorAnnotation.type.className}")
+      }
     }
   }
 }

@@ -200,20 +200,39 @@ class ColonistProcessor(
       warmUpGripCaches(grip, parameters.inputs)
 
       val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
-      val colonyMarkerParser = ColonyMarkerParserImpl(grip, SettlerSelectorParserImpl, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
-      val colonyParser = ColonyParserImpl(grip, errorReporter)
-      val settlerParser = SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
-      val settlerDiscoverer = SettlerDiscovererImpl(grip, parameters.inputs, settlerParser)
+
+      val colonyMarkerParser = ColonyMarkerParserImpl(
+        grip = grip,
+        settlerSelectorParser = SettlerSelectorParserImpl,
+        settlerProducerParser = SettlerProducerParserImpl,
+        settlerAcceptorParser = SettlerAcceptorParserImpl
+      )
+
+      val colonyParser = ColonyParserImpl(
+        grip = grip, errorReporter = errorReporter
+      )
+
+      val settlerParser = SettlerParserImpl(
+        grip = grip,
+        settlerProducerParser = SettlerProducerParserImpl,
+        settlerAcceptorParser = SettlerAcceptorParserImpl
+      )
+
+      val settlerDiscoverer = SettlerDiscovererImpl(
+        grip = grip,
+        inputs = parameters.inputs,
+        settlerParser = settlerParser
+      )
 
       ColonistProcessor(
-        parameters.inputs,
-        parameters.outputs,
-        grip,
-        annotationIndex,
-        colonyMarkerParser,
-        colonyParser,
-        settlerDiscoverer,
-        errorReporter
+        inputs = parameters.inputs,
+        outputs = parameters.outputs,
+        grip = grip,
+        annotationIndex = annotationIndex,
+        colonyMarkerParser = colonyMarkerParser,
+        colonyParser = colonyParser,
+        settlerDiscoverer = settlerDiscoverer,
+        errorReporter = errorReporter
       ).use {
         it.processClasses()
       }

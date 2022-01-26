@@ -241,7 +241,13 @@ class GeneratorAdapter(
       signature: String?,
       exceptions: Array<Type.Object>?
     ): MethodVisitor {
-      return classVisitor.visitMethod(access, method.name, method.descriptor, signature, exceptions?.mapToArray { it.internalName })
+      return classVisitor.visitMethod(
+        access,
+        method.name,
+        method.descriptor,
+        signature,
+        exceptions?.mapToArray { it.internalName }
+      )
     }
 
     private fun negateCmpMode(mode: Int): Int {

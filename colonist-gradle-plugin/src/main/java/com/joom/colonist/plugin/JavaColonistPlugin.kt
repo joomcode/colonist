@@ -72,8 +72,19 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       compileTask.options.bootstrapClasspath?.toList()
         ?: System.getProperty("sun.boot.class.path")?.split(File.pathSeparator)?.map { File(it) }
         ?: emptyList()
-    val colonistTask = createColonistProcessTask("colonistProcess$suffix", classesDirs, backupDirs, sourceDir, classpath, bootClasspath)
-    val backupTask = createBackupClassFilesTask("colonistBackupClasses$suffix", classesDirs, backupDirs)
+    val colonistTask = createColonistProcessTask(
+      taskName = "colonistProcess$suffix",
+      classesDirs = classesDirs,
+      backupDirs = backupDirs,
+      sourceDir = sourceDir,
+      classpath = classpath,
+      bootClasspath = bootClasspath
+    )
+    val backupTask = createBackupClassFilesTask(
+      taskName = "colonistBackupClasses$suffix",
+      classesDirs = classesDirs,
+      backupDirs = backupDirs
+    )
     configureTasks(colonistTask, backupTask, compileTask)
   }
 

@@ -20,7 +20,6 @@ import com.joom.colonist.AcceptSettlersViaCallback;
 import com.joom.colonist.Colony;
 import com.joom.colonist.ProduceSettlersViaConstructor;
 import com.joom.colonist.SelectSettlersByAnnotation;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

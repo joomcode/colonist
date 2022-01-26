@@ -93,7 +93,10 @@ fun ClassMirror.getSettlerAcceptorOrNull(settlerAcceptorParser: SettlerAcceptorP
   return settlerAcceptorParser.parseSettlerAcceptor(annotation)
 }
 
-private fun ClassMirror.getSingleMatchingAnnotation(annotationTypes: Iterable<Type.Object>, annotationKind: String): AnnotationMirror {
+private fun ClassMirror.getSingleMatchingAnnotation(
+  annotationTypes: Iterable<Type.Object>,
+  annotationKind: String
+): AnnotationMirror {
   return getSingleMatchingAnnotation(annotationTypes) { annotations ->
     composeErrorMessage(this, annotationKind, annotations)
   }
@@ -107,7 +110,10 @@ private inline fun ClassMirror.getSingleMatchingAnnotation(
   return annotations.singleOrNull() ?: error(message(annotations))
 }
 
-private fun ClassMirror.getAtMostOneMatchingAnnotation(annotationTypes: Iterable<Type.Object>, annotationKind: String): AnnotationMirror? {
+private fun ClassMirror.getAtMostOneMatchingAnnotation(
+  annotationTypes: Iterable<Type.Object>,
+  annotationKind: String
+): AnnotationMirror? {
   return getAtMostOneMatchingAnnotation(annotationTypes) { annotations ->
     composeErrorMessage(this, annotationKind, annotations)
   }
@@ -125,7 +131,11 @@ private fun ClassMirror.getMatchingAnnotations(annotationTypes: Iterable<Type.Ob
   return annotationTypes.mapNotNull { annotations[it] }
 }
 
-private fun composeErrorMessage(mirror: ClassMirror, annotationKind: String, annotations: List<AnnotationMirror>): String {
+private fun composeErrorMessage(
+  mirror: ClassMirror,
+  annotationKind: String,
+  annotations: List<AnnotationMirror>
+): String {
   return if (annotations.isEmpty()) {
     "Class ${mirror.type.className} doesn't have any $annotationKind annotation"
   } else {

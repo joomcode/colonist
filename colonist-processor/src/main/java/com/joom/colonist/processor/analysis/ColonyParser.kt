@@ -48,7 +48,11 @@ class ColonyParserImpl(
     return Colony(colonyType, colonyMarker, settlers, settlerProducer, settlerAcceptor)
   }
 
-  private fun findColonyCallbackMethod(mirror: ClassMirror, callbackAnnotationType: Type.Object, colonyAnnotationType: Type.Object): MethodMirror? {
+  private fun findColonyCallbackMethod(
+    mirror: ClassMirror,
+    callbackAnnotationType: Type.Object,
+    colonyAnnotationType: Type.Object
+  ): MethodMirror? {
     val methods = mirror.methods.filter { method ->
       method.annotations.any { annotation ->
         annotation.type == callbackAnnotationType && annotation.values["colonyAnnotation"] == colonyAnnotationType

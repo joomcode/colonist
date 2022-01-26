@@ -17,7 +17,6 @@
 package com.joom.colonist;
 
 import com.joom.colonist.internal.ColonyFounder;
-
 import javax.annotation.Nonnull;
 
 public class Colonist {

@@ -40,12 +40,25 @@ class ColonyPatcher(
   private val colonies: Collection<Colony>
 ) : WatermarkClassVisitor(classVisitor, false) {
 
-  override fun visit(version: Int, access: Int, name: String, signature: String?, superName: String?, interfaces: Array<String>?) {
+  override fun visit(
+    version: Int,
+    access: Int,
+    name: String,
+    signature: String?,
+    superName: String?,
+    interfaces: Array<String>?
+  ) {
     val newInterfaces = combineInterfaces(interfaces, Types.COLONY_FOUNDER_TYPE.internalName)
     super.visit(version, access, name, signature, superName, newInterfaces)
   }
 
-  override fun visitMethod(access: Int, name: String, descriptor: String, signature: String?, exceptions: Array<out String>?): MethodVisitor? {
+  override fun visitMethod(
+    access: Int,
+    name: String,
+    descriptor: String,
+    signature: String?,
+    exceptions: Array<out String>?
+  ): MethodVisitor? {
     if (name == FOUND_METHOD.name && descriptor == FOUND_METHOD.descriptor) {
       return null
     }
