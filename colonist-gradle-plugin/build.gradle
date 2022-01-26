@@ -16,12 +16,6 @@ dependencies {
   compileOnly "com.android.tools.build:gradle-api:$androidToolsVersion"
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
-
 def generatedDir = new File(projectDir, "generated")
 def generatedJavaSourcesDir = new File(generatedDir, "main/java")
 
