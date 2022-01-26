@@ -19,6 +19,7 @@ package com.joom.colonist.plugin
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.watermark.WatermarkChecker
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.logging.LogLevel
@@ -27,7 +28,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 
 open class ColonistTask : DefaultTask() {
   @InputFiles

@@ -1,0 +1,26 @@
+root = true
+
+[*]
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+indent_style = space
+indent_size = 2
+continuation_indent_size = 4
+max_line_length = 150
+
+[*.{kt, kts}]
+# The new version of ktlint has very strict indentation rules.
+disabled_rules = indent
+# This rules make ktlint respect our import ordering.
+ij_kotlin_imports_layout = *
+
+[*.xml]
+continuation_indent_size = 2
+insert_final_newline = true
+max_line_length = unset
+
+[*.py]
+indent_size = 4
+continuation_indent_size = 8
+insert_final_newline = true

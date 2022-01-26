@@ -17,11 +17,11 @@
 package com.joom.colonist.plugin
 
 import com.joom.colonist.processor.watermark.WatermarkChecker
+import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
-import java.io.File
 
 open class BackupClassesTask : DefaultTask() {
   @InputFiles

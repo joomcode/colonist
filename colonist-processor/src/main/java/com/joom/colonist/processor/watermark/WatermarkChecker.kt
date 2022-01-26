@@ -16,19 +16,23 @@
 
 package com.joom.colonist.processor.watermark
 
+import java.io.File
+import java.io.IOException
 import org.objectweb.asm.Attribute
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.Opcodes
-import java.io.File
-import java.io.IOException
 
 class WatermarkChecker : ClassVisitor(Opcodes.ASM9) {
   var isColonistClass: Boolean = false
     private set
 
   override fun visit(
-    version: Int, access: Int, name: String, signature: String?, superName: String?,
+    version: Int,
+    access: Int,
+    name: String,
+    signature: String?,
+    superName: String?,
     interfaces: Array<String>?
   ) {
     isColonistClass = false

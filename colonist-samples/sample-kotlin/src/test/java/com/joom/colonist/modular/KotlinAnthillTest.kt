@@ -16,12 +16,12 @@
 
 package com.joom.colonist.modular
 
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class KotlinAnthillTest {
   private val stream = ByteArrayOutputStream()
@@ -50,4 +50,3 @@ class KotlinAnthillTest {
     }
   }
 }
-

@@ -33,4 +33,3 @@ class FeatureManager(private val callback: (Feature) -> Unit) {
     callback(feature)
   }
 }
-

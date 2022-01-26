@@ -16,6 +16,8 @@
 
 package com.joom.colonist.plugin
 
+import java.io.File
+import java.util.Locale
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -23,8 +25,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetOutput
 import org.gradle.api.tasks.compile.JavaCompile
-import java.io.File
-import java.util.Locale
 
 class JavaColonistPlugin : BaseColonistPlugin() {
   override fun apply(project: Project) {

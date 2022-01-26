@@ -45,13 +45,13 @@ import com.joom.grip.io.IoFactory
 import com.joom.grip.mirrors.Annotated
 import com.joom.grip.mirrors.Type
 import com.joom.grip.mirrors.getObjectTypeByInternalName
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassVisitor
-import org.objectweb.asm.ClassWriter
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.streams.toList
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.ClassWriter
 
 class ColonistProcessor(
   inputs: List<File>,

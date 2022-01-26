@@ -29,7 +29,11 @@ open class WatermarkClassVisitor(
   private var isAttributeAdded: Boolean = false
 
   override fun visit(
-    version: Int, access: Int, name: String, signature: String?, superName: String?,
+    version: Int,
+    access: Int,
+    name: String,
+    signature: String?,
+    superName: String?,
     interfaces: Array<String>?
   ) {
     isDirty = isDirtyByDefault
