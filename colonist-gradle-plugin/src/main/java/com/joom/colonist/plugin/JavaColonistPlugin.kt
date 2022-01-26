@@ -24,6 +24,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetOutput
 import org.gradle.api.tasks.compile.JavaCompile
 import java.io.File
+import java.util.Locale
 
 class JavaColonistPlugin : BaseColonistPlugin() {
   override fun apply(project: Project) {
@@ -61,7 +62,7 @@ class JavaColonistPlugin : BaseColonistPlugin() {
   }
 
   private fun createTasks(sourceSet: SourceSet, compileTask: JavaCompile, nameSuffix: String = "") {
-    val suffix = nameSuffix.capitalize()
+    val suffix = nameSuffix.capitalized()
     val colonistDir = File(project.buildDir, getColonistRelativePath(nameSuffix))
     val classesDirs = getClassesDirs(sourceSet.output)
     val backupDirs = getBackupDirs(project.buildDir, colonistDir, classesDirs)
@@ -98,8 +99,8 @@ class JavaColonistPlugin : BaseColonistPlugin() {
     colonistTask.dependsOn(backupTask)
     compileTask.finalizedBy(colonistTask)
 
-    val cleanBackupTask = project.tasks["clean${backupTask.name.capitalize()}"]!!
-    val cleanColonistTask = project.tasks["clean${colonistTask.name.capitalize()}"]!!
+    val cleanBackupTask = project.tasks["clean${backupTask.name.capitalized()}"]!!
+    val cleanColonistTask = project.tasks["clean${colonistTask.name.capitalized()}"]!!
 
     cleanBackupTask.doFirst {
       backupTask.clean()
@@ -144,6 +145,10 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       task.classesDirs = classesDirs
       task.backupDirs = backupDirs
     }
+  }
+
+  private fun String.capitalized(): String {
+    return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
   }
 
   companion object {
