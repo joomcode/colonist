@@ -16,6 +16,7 @@
 
 rootProject.name = 'colonist'
 
+include ':colonist-annotations'
 include ':colonist-core'
 include ':colonist-gradle-plugin'
 include ':colonist-processor'

@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+apply from: "$rootDir/pablo.gradle"
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+jar {
+  destinationDirectory.set(file('build/jar'))
+}
+
+pablo {
+  artifactName = "colonist-annotations"
+}
