@@ -6,7 +6,7 @@ sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
 dependencies {
-  implementation project(':colonist-core')
+  implementation project(':core')
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   implementation "ch.qos.logback:logback-classic:$logbackVersion"
 

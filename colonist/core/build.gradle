@@ -5,7 +5,7 @@ sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
 dependencies {
-  api project(":colonist-annotations")
+  api project(":annotations")
   implementation "com.google.code.findbugs:jsr305:$jsr305Version"
 
   testImplementation "junit:junit:$junitVersion"

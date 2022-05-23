@@ -7,7 +7,7 @@ targetCompatibility = javaVersion
 sourceCompatibility = javaVersion
 
 dependencies {
-  relocate project(':colonist-processor')
+  relocate project(':processor')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
 
