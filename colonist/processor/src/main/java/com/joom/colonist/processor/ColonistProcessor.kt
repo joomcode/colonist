@@ -31,7 +31,6 @@ import com.joom.colonist.processor.commons.StandaloneClassWriter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.commons.closeQuietly
 import com.joom.colonist.processor.generation.ColonyPatcher
-import com.joom.colonist.processor.generation.SettlerPatcher
 import com.joom.colonist.processor.logging.getLogger
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
@@ -146,7 +145,7 @@ class ColonistProcessor(
               classReader, ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES, grip.classRegistry
             )
             val classType = getObjectTypeByInternalName(classReader.className)
-            val classVisitor = createClassVisitorForType(classType, classWriter, colonies, colonyTypeToColoniesMap)
+            val classVisitor = createClassVisitorForType(classType, classWriter, colonyTypeToColoniesMap)
             classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
             fileSink.createFile(path, classWriter.toByteArray())
           }
@@ -165,16 +164,9 @@ class ColonistProcessor(
   private fun createClassVisitorForType(
     type: Type.Object,
     input: ClassVisitor,
-    colonies: Collection<Colony>,
     colonyTypeToColoniesMap: Map<Type.Object, Collection<Colony>>
   ): ClassVisitor {
-    val visitor = colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
-    val isSettler = colonies.any { isSettler(it, type) }
-    return if (isSettler) SettlerPatcher(visitor) else visitor
-  }
-
-  private fun isSettler(colony: Colony, type: Type.Object): Boolean {
-    return colony.settlers.any { it.type == type }
+    return colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
   }
 
   private fun checkErrors() {
@@ -221,7 +213,8 @@ class ColonistProcessor(
       val settlerDiscoverer = SettlerDiscovererImpl(
         grip = grip,
         inputs = parameters.inputs,
-        settlerParser = settlerParser
+        settlerParser = settlerParser,
+        errorReporter = errorReporter
       )
 
       ColonistProcessor(
