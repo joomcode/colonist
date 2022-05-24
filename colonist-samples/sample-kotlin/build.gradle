@@ -6,7 +6,7 @@ apply plugin: 'com.joom.colonist'
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
-mainClassName = 'com.joom.colonist.sample.ColonistSample'
+mainClassName = 'com.joom.colonist.modular.ColonistSampleKt'
 
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"

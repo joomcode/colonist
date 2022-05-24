@@ -5,7 +5,7 @@ apply plugin: 'com.joom.colonist'
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
 
-mainClassName = 'com.joom.colonist.sample.ColonistSample'
+mainClassName = 'com.joom.colonist.modular.ColonistSample'
 
 dependencies {
   testImplementation "junit:junit:$junitVersion"
