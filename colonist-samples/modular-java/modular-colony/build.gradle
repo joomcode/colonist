@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'com.joom.colonist'
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+dependencies {
+  implementation "com.joom.colonist:colonist-core:$version"
+  implementation project(":colonist-samples:modular-java:modular-colony-api")
+}
