@@ -18,22 +18,19 @@ package com.joom.colonist.processor.generation
 
 import com.joom.colonist.processor.commons.GeneratorAdapter
 import com.joom.colonist.processor.commons.Types
-import com.joom.colonist.processor.commons.contains
-import com.joom.colonist.processor.commons.exhaustive
-import com.joom.colonist.processor.commons.invokeMethod
 import com.joom.colonist.processor.commons.newMethod
-import com.joom.colonist.processor.commons.toMethodDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.descriptors.descriptor
 import com.joom.colonist.processor.model.Colony
-import com.joom.colonist.processor.model.Settler
-import com.joom.colonist.processor.model.SettlerAcceptor
-import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.watermark.WatermarkClassVisitor
+import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Opcodes.ACC_PRIVATE
+import org.objectweb.asm.Opcodes.ACC_PROTECTED
+import org.objectweb.asm.Opcodes.ACC_PUBLIC
 
 class ColonyPatcher(
   private val classVisitor: ClassVisitor,
@@ -49,7 +46,7 @@ class ColonyPatcher(
     interfaces: Array<String>?
   ) {
     val newInterfaces = combineInterfaces(interfaces, Types.COLONY_FOUNDER_TYPE.internalName)
-    super.visit(version, access, name, signature, superName, newInterfaces)
+    super.visit(version, makeAccessPublic(access), name, signature, superName, newInterfaces)
   }
 
   override fun visitMethod(
@@ -63,7 +60,13 @@ class ColonyPatcher(
       return null
     }
 
-    return super.visitMethod(access, name, descriptor, signature, exceptions)
+    val isAcceptOrProduceMethod = colonies.any {
+      it.settlerAcceptor.matchesMethod(name, descriptor) || it.settlerProducer.matchesMethod(name, descriptor)
+    }
+
+    val newAccess = if (isAcceptOrProduceMethod) makeAccessPublic(access) else access
+
+    return super.visitMethod(newAccess, name, descriptor, signature, exceptions)
   }
 
   override fun visitEnd() {
@@ -73,11 +76,20 @@ class ColonyPatcher(
     super.visitEnd()
   }
 
+  private fun MethodMirror?.matchesMethod(name: String, descriptor: String): Boolean {
+    if (this == null) {
+      return false
+    }
+
+    return this.name == name && this.type.descriptor == descriptor
+  }
+
+  private fun makeAccessPublic(access: Int): Int {
+    return (access and (ACC_PRIVATE or ACC_PROTECTED).inv()) or ACC_PUBLIC
+  }
+
   private fun generateColonyFounderMethods(methods: Collection<ColonyMethod>) {
     generateColonyFounderDispatcherMethod(methods)
-    for (method in methods) {
-      generateColonyFounderMethod(method)
-    }
   }
 
   private fun generateColonyFounderDispatcherMethod(methods: Collection<ColonyMethod>) {
@@ -86,7 +98,7 @@ class ColonyPatcher(
       ifNull {
         for (method in methods) {
           loadThis()
-          invokePrivate(method.colony.type, method.method)
+          invokeStatic(method.colony.delegate, method.delegateMethod)
         }
         returnValue()
       }
@@ -96,82 +108,16 @@ class ColonyPatcher(
         push(method.colony.marker.type)
         ifCmp(Types.CLASS_TYPE, GeneratorAdapter.EQ) {
           loadThis()
-          invokePrivate(method.colony.type, method.method)
+          invokeStatic(method.colony.delegate, method.delegateMethod)
           returnValue()
         }
       }
     }
   }
 
-  private fun generateColonyFounderMethod(method: ColonyMethod) {
-    classVisitor.newMethod(Opcodes.ACC_PRIVATE, method.method) {
-      for (settler in method.colony.settlers) {
-        produceSettler(method.colony, settler)
-        acceptSettler(method.colony, settler)
-      }
-    }
-  }
-
-  private fun GeneratorAdapter.produceSettler(colony: Colony, settler: Settler) {
-    exhaustive(
-      when (settler.overriddenSettlerProducer ?: colony.marker.settlerProducer) {
-        SettlerProducer.Constructor -> invokeDefaultConstructor(settler.type)
-        SettlerProducer.Callback -> invokeProduceCallback(colony, settler)
-        SettlerProducer.Class -> push(settler.type)
-      }
-    )
-  }
-
-  private fun GeneratorAdapter.invokeDefaultConstructor(type: Type.Object) {
-    newInstance(type)
-    dup()
-    invokeConstructor(type, MethodDescriptor.forDefaultConstructor())
-  }
-
-  private fun GeneratorAdapter.invokeProduceCallback(colony: Colony, settler: Settler) {
-    val callback = colony.settlerProducer!!
-    val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
-
-    if (isCallbackStatic) {
-      loadThis()
-    }
-
-    push(settler.type)
-
-    if (isCallbackStatic) {
-      invokeStatic(colony.type, callback.toMethodDescriptor())
-    } else {
-      invokeMethod(colony.type, callback)
-    }
-  }
-
-  private fun GeneratorAdapter.acceptSettler(colony: Colony, settler: Settler) {
-    exhaustive(
-      when (settler.overriddenSettlerAcceptor ?: colony.marker.settlerAcceptor) {
-        SettlerAcceptor.None -> pop()
-        SettlerAcceptor.Callback -> invokeAcceptCallback(colony, settler)
-      }
-    )
-  }
-
-  private fun GeneratorAdapter.invokeAcceptCallback(colony: Colony, settler: Settler) {
-    val callback = colony.settlerAcceptor!!
-    val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
-
-    checkCast(callback.parameters[0].type)
-
-    if (isCallbackStatic) {
-      invokeStatic(colony.type, callback.toMethodDescriptor())
-    } else {
-      loadThis()
-      swap(settler.type, colony.type)
-      invokeMethod(colony.type, callback)
-    }
-  }
-
   private class ColonyMethod(
     val colony: Colony,
-    val method: MethodDescriptor
+    val delegateMethod: MethodDescriptor,
   )
 
   companion object {
@@ -190,9 +136,8 @@ class ColonyPatcher(
     }
 
     private fun composeColonyMethod(colony: Colony): ColonyMethod {
-      val name = "${FOUND_METHOD.name}__colonist__${colony.marker.type.internalName.replace('/', '_')}"
-      val method = MethodDescriptor.forMethod(name, Type.Primitive.Void)
-      return ColonyMethod(colony, method)
+      val delegateMethod = MethodDescriptor.forMethod("found", Type.Primitive.Void, colony.type)
+      return ColonyMethod(colony, delegateMethod)
     }
   }
 }

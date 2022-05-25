@@ -21,8 +21,8 @@ import com.joom.grip.mirrors.Type
 
 data class Colony(
   val type: Type.Object,
+  val delegate: Type.Object,
   val marker: ColonyMarker,
-  val settlers: Collection<Settler>,
   val settlerProducer: MethodMirror?,
   val settlerAcceptor: MethodMirror?
 )

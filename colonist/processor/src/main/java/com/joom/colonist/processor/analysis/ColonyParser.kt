@@ -16,34 +16,30 @@
 
 package com.joom.colonist.processor.analysis
 
-import com.joom.colonist.processor.ErrorReporter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
-import com.joom.colonist.processor.model.Settler
-import com.joom.colonist.processor.model.SettlerAcceptor
-import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.grip.Grip
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getObjectType
 
 interface ColonyParser {
-  fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker, settlers: Collection<Settler>): Colony
+  fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony
 }
 
 class ColonyParserImpl(
   private val grip: Grip,
-  private val errorReporter: ErrorReporter
 ) : ColonyParser {
 
-  override fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker, settlers: Collection<Settler>): Colony {
+  override fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony {
     val mirror = grip.classRegistry.getClassMirror(colonyType)
+    val delegate = getObjectType("L__colonist__${colonyType.sanitizedInternalName}_${colonyMarker.type.sanitizedInternalName}_Delegate;")
     val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type)
     val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type)
 
-
-    return Colony(colonyType, colonyMarker, settlers, settlerProducer, settlerAcceptor)
+    return Colony(colonyType, delegate, colonyMarker, settlerProducer, settlerAcceptor)
   }
 
   private fun findColonyCallbackMethod(
@@ -77,4 +73,6 @@ class ColonyParserImpl(
     return method
   }
 
+  private val Type.sanitizedInternalName: String
+    get() = internalName.replace('/', '_')
 }
