@@ -21,4 +21,5 @@ jar {
 
 colonist {
   processTest false
+  discoverSettlers true
 }

@@ -15,4 +15,5 @@ dependencies {
 
 colonist {
   processTest false
+  discoverSettlers true
 }

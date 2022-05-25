@@ -18,4 +18,5 @@ package com.joom.colonist.plugin
 
 open class JavaColonistPluginExtension {
   var processTest: Boolean = true
+  var discoverSettlers: Boolean = false
 }
