@@ -191,7 +191,7 @@ class ColonistProcessor(
 
       warmUpGripCaches(grip, parameters.inputs)
 
-      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
+      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs + parameters.classpath)
 
       val colonyMarkerParser = ColonyMarkerParserImpl(
         grip = grip,
@@ -212,7 +212,7 @@ class ColonistProcessor(
 
       val settlerDiscoverer = SettlerDiscovererImpl(
         grip = grip,
-        inputs = parameters.inputs,
+        inputs = parameters.inputs + parameters.classpath,
         settlerParser = settlerParser,
         errorReporter = errorReporter
       )
