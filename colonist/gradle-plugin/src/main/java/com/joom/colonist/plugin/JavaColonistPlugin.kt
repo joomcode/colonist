@@ -67,7 +67,7 @@ class JavaColonistPlugin : BaseColonistPlugin() {
     val classesDirs = getClassesDirs(sourceSet.output)
     val backupDirs = getBackupDirs(project.buildDir, colonistDir, classesDirs)
     val sourceDir = File(colonistDir, "src")
-    val classpath = compileTask.classpath.toList()
+    val classpath = compileTask.classpath.toList() - classesDirs.toSet()
     val bootClasspath =
       compileTask.options.bootstrapClasspath?.toList()
         ?: System.getProperty("sun.boot.class.path")?.split(File.pathSeparator)?.map { File(it) }
