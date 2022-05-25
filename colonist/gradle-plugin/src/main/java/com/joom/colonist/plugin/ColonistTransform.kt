@@ -44,16 +44,25 @@ class ColonistTransform(
       invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, format)
     }
 
+    val generationOutput = invocation.outputProvider.getContentLocation(
+      "gen-colonist",
+      setOf(QualifiedContent.DefaultContentType.CLASSES),
+      EnumSet.of(QualifiedContent.Scope.PROJECT),
+      Format.DIRECTORY
+    )
+
     val parameters = ColonistParameters(
       inputs = inputs.map { it.file },
       outputs = outputs,
+      generationOutput = generationOutput,
       classpath = invocation.referencedInputs.flatMap { input ->
         input.jarInputs.map { it.file } + input.directoryInputs.map { it.file }
       },
       bootClasspath = extension.bootClasspath,
       projectName = invocation.context.variantName,
+      discoverSettlers = true,
       debug = logger.isDebugEnabled,
-      info = logger.isInfoEnabled
+      info = logger.isInfoEnabled,
     )
     logger.info("Starting Colonist processor: {}", parameters)
     try {

@@ -36,9 +36,9 @@ class JavaColonistPlugin : BaseColonistPlugin() {
 
     project.afterEvaluate {
       if (project.plugins.hasPlugin("java")) {
-        setupColonistForJava()
+        setupColonistForJava(discoverSettlers = colonist.discoverSettlers)
         if (colonist.processTest) {
-          setupColonistForJavaTest()
+          setupColonistForJavaTest(discoverSettlers = colonist.discoverSettlers)
         }
       } else {
         throw GradleException("Project should use Java plugin")
@@ -51,17 +51,17 @@ class JavaColonistPlugin : BaseColonistPlugin() {
     addDependencies(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
   }
 
-  private fun setupColonistForJava() {
+  private fun setupColonistForJava(discoverSettlers: Boolean) {
     logger.info("Setting up Colonist task for Java project {}...", project.name)
-    createTasks(project.sourceSets.main, project.tasks.compileJava)
+    createTasks(project.sourceSets.main, project.tasks.compileJava, discoverSettlers)
   }
 
-  private fun setupColonistForJavaTest() {
+  private fun setupColonistForJavaTest(discoverSettlers: Boolean) {
     logger.info("Setting up Colonist task for Java test project {}...", project.name)
-    createTasks(project.sourceSets.test, project.tasks.compileTestJava, "test")
+    createTasks(project.sourceSets.test, project.tasks.compileTestJava, discoverSettlers, "test")
   }
 
-  private fun createTasks(sourceSet: SourceSet, compileTask: JavaCompile, nameSuffix: String = "") {
+  private fun createTasks(sourceSet: SourceSet, compileTask: JavaCompile, discoverSettlers: Boolean, nameSuffix: String = "") {
     val suffix = nameSuffix.capitalized()
     val colonistDir = File(project.buildDir, getColonistRelativePath(nameSuffix))
     val classesDirs = getClassesDirs(sourceSet.output)
@@ -78,7 +78,8 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       backupDirs = backupDirs,
       sourceDir = sourceDir,
       classpath = classpath,
-      bootClasspath = bootClasspath
+      bootClasspath = bootClasspath,
+      discoverSettlers = discoverSettlers,
     )
     val backupTask = createBackupClassFilesTask(
       taskName = "colonistBackupClasses$suffix",
@@ -130,7 +131,8 @@ class JavaColonistPlugin : BaseColonistPlugin() {
     backupDirs: List<File>,
     sourceDir: File,
     classpath: List<File>,
-    bootClasspath: List<File>
+    bootClasspath: List<File>,
+    discoverSettlers: Boolean,
   ): ColonistTask {
     logger.info("Creating Colonist task {}...", taskName)
     logger.info("  Source classes directories: {}", backupDirs)
@@ -143,6 +145,7 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       task.sourceDir = sourceDir
       task.classpath = classpath
       task.bootClasspath = bootClasspath
+      task.discoverSettlers = discoverSettlers
     }
   }
 

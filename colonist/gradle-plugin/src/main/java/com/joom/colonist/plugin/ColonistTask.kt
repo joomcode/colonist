@@ -24,6 +24,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.OutputDirectory
@@ -47,6 +48,9 @@ open class ColonistTask : DefaultTask() {
   @Classpath
   var bootClasspath: List<File> = emptyList()
 
+  @Input
+  var discoverSettlers: Boolean = false
+
   init {
     logging.captureStandardOutput(LogLevel.INFO)
   }
@@ -59,8 +63,10 @@ open class ColonistTask : DefaultTask() {
       inputs = backupDirs,
       outputs = classesDirs,
       classpath = classpath,
+      generationOutput = classesDirs.first(),
       bootClasspath = bootClasspath,
       projectName = name.orEmpty().replace(":colonistProcess", ":").replace(':', '$'),
+      discoverSettlers = discoverSettlers,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled
     )
