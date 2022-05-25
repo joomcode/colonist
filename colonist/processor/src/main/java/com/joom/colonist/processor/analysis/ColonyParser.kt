@@ -42,8 +42,6 @@ class ColonyParserImpl(
     val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type)
     val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type)
 
-    validateSettlerProducer(colonyType, colonyMarker, settlers, settlerProducer)
-    validateSettlerAcceptor(colonyType, colonyMarker, settlers, settlerAcceptor)
 
     return Colony(colonyType, colonyMarker, settlers, settlerProducer, settlerAcceptor)
   }
@@ -79,51 +77,4 @@ class ColonyParserImpl(
     return method
   }
 
-  private fun validateSettlerProducer(
-    colonyType: Type.Object,
-    colonyMarker: ColonyMarker,
-    settlers: Collection<Settler>,
-    settlerProducer: MethodMirror?
-  ) {
-    if (settlerProducer != null) {
-      return
-    }
-
-    val settlerTypesWithCallbackProducer = settlers.mapNotNull { settler ->
-      val producer = settler.overriddenSettlerProducer ?: colonyMarker.settlerProducer
-      settler.type.takeIf { producer is SettlerProducer.Callback }
-    }
-
-    if (settlerTypesWithCallbackProducer.isEmpty()) {
-      return
-    }
-
-    val colonyClassName = colonyType.className
-    val settlerClassNames = settlerTypesWithCallbackProducer.joinToString { it.className }
-    errorReporter.reportError("Colony $colonyClassName expected to have a producer callback for settlers [$settlerClassNames]")
-  }
-
-  private fun validateSettlerAcceptor(
-    colonyType: Type.Object,
-    colonyMarker: ColonyMarker,
-    settlers: Collection<Settler>,
-    settlerAcceptor: MethodMirror?
-  ) {
-    if (settlerAcceptor != null) {
-      return
-    }
-
-    val settlerTypesWithCallbackAcceptor = settlers.mapNotNull { settler ->
-      val acceptor = settler.overriddenSettlerAcceptor ?: colonyMarker.settlerAcceptor
-      settler.type.takeIf { acceptor is SettlerAcceptor.Callback }
-    }
-
-    if (settlerTypesWithCallbackAcceptor.isEmpty()) {
-      return
-    }
-
-    val colonyClassName = colonyType.className
-    val settlerClassNames = settlerTypesWithCallbackAcceptor.joinToString { it.className }
-    errorReporter.reportError("Colony $colonyClassName expected to have an acceptor callback for settlers [$settlerClassNames]")
-  }
 }
