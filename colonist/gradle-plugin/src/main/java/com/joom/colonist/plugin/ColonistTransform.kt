@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@file:Suppress("deprecation")
 package com.joom.colonist.plugin
 
 import com.android.build.api.transform.Format

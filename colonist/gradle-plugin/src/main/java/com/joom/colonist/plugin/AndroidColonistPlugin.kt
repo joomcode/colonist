@@ -32,6 +32,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     val transform = ColonistTransform(extension)
 
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+    @Suppress("DEPRECATION")
     project.android.registerTransform(transform)
 
     project.afterEvaluate {
