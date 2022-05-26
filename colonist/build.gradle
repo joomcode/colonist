@@ -1,5 +1,5 @@
 buildscript {
-  apply from: 'versions.gradle'
+  apply from: '../versions.gradle'
 
   repositories {
     mavenLocal()
@@ -10,7 +10,7 @@ buildscript {
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     classpath "com.android.tools.build:gradle:$androidToolsVersion"
-    classpath "com.joom.colonist:colonist-gradle-plugin:$COLONIST_VERSION"
+    classpath "io.michaelrocks.pablo:pablo:$pabloVersion"
   }
 }
 

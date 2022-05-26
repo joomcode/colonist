@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-rootProject.name = 'colonist'
-
-include ':colonist-annotations'
-include ':colonist-core'
-include ':colonist-gradle-plugin'
-include ':colonist-processor'
-
-if (!properties['bootstrap'].toBoolean()) {
-  include ':colonist-samples:sample-java'
-  include ':colonist-samples:sample-kotlin'
-  include ':colonist-samples:modular-android:modular-api'
-  include ':colonist-samples:modular-android:modular-app'
-
-  def featuresString = properties['enabledFeatures']?.toString() ?: ""
-  def features = featuresString.tokenize(",")
-  for (feature in features) {
-    include ":colonist-samples:modular-android:modular-$feature"
+def isDevelopment = properties['development'].toBoolean()
+includeBuild('colonist') {
+  if (isDevelopment) {
+    dependencySubstitution {
+      substitute module('com.joom.colonist:colonist-annotations') using project(':annotations')
+      substitute module('com.joom.colonist:colonist-processor') using project(':processor')
+      substitute module('com.joom.colonist:colonist-core') using project(':core')
+      substitute module('com.joom.colonist:colonist-gradle-plugin') using project(':gradle-plugin')
+    }
   }
+}
+
+include ':colonist-samples:sample-java'
+include ':colonist-samples:sample-kotlin'
+include ':colonist-samples:modular-android:modular-api'
+include ':colonist-samples:modular-android:modular-app'
+
+def featuresString = properties['enabledFeatures']?.toString() ?: ""
+def features = featuresString.tokenize(",")
+for (feature in features) {
+  include ":colonist-samples:modular-android:modular-$feature"
 }

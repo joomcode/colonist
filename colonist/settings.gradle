@@ -1,0 +1,6 @@
+rootProject.name = 'colonist'
+
+include ':annotations'
+include ':core'
+include ':gradle-plugin'
+include ':processor'

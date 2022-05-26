@@ -1,5 +1,10 @@
 apply plugin: 'io.michaelrocks.pablo'
 
+configurations.getByName("relocate") { relocateConfiguration ->
+  configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(relocateConfiguration)
+  configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(relocateConfiguration)
+}
+
 pablo {
   pom {
     name = 'Colonist'
