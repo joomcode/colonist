@@ -16,8 +16,12 @@
 
 package com.joom.colonist.plugin
 
+import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.artifact.MultipleArtifact
+import com.android.build.api.variant.Variant
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.plugins.JavaPlugin
 
 class AndroidColonistPlugin : BaseColonistPlugin() {
@@ -28,15 +32,74 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
     }
 
-    val extension = project.extensions.create("colonist", AndroidColonistExtension::class.java)
-    val transform = ColonistTransform(extension)
-
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
+    if (AndroidGradlePluginVersionProvider.getCurrentPluginVersion() >= VARIANT_API_REQUIRED_VERSION) {
+      logger.info("Registering colonist with variant API")
+
+      registerColonistWithVariantApi()
+    } else {
+      logger.info("Registering colonist with transform API")
+
+      registerColonistWithTransform()
+    }
+  }
+
+  private fun registerColonistWithVariantApi() {
+    project.applicationAndroidComponents?.apply {
+      onVariants { variant ->
+        variant.registerColonistTask(discoverSettlers = true, transformUnitTests = true)
+      }
+    }
+
+    project.libraryAndroidComponents?.apply {
+      onVariants { variant ->
+        variant.registerColonistTask(discoverSettlers = false, transformUnitTests = false)
+      }
+    }
+  }
+
+  @Suppress("UnstableApiUsage")
+  private fun Variant.registerColonistTask(discoverSettlers: Boolean, transformUnitTests: Boolean) {
+    val taskProvider = project.registerTask<ColonistTransformClassesTask>("${name}ColonistTransformClasses")
+    artifacts.use(taskProvider)
+      .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
+      .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
+
+    if (transformUnitTests && unitTest != null) {
+      unitTest!!.artifacts.use(taskProvider)
+        .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
+        .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
+    }
+
+    taskProvider.configure { task ->
+      task.discoverSettlers = discoverSettlers
+      task.classpath.setFrom(
+        project.configurations.getByName("${name}RuntimeClasspath")
+          .incoming
+          .artifactView {
+            it.attributes { attributes ->
+              attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
+            }
+          }
+          .artifacts
+          .artifactFiles
+      )
+      task.bootClasspath.setFrom(project.android.bootClasspath)
+    }
+  }
+
+  private fun registerColonistWithTransform() {
+    val extension = project.extensions.create("colonist", AndroidColonistExtension::class.java)
+
     @Suppress("DEPRECATION")
-    project.android.registerTransform(transform)
+    project.android.registerTransform(ColonistTransform(extension))
 
     project.afterEvaluate {
       extension.bootClasspath = project.android.bootClasspath
     }
+  }
+
+  private companion object {
+    private val VARIANT_API_REQUIRED_VERSION = AndroidPluginVersion(major = 7, minor = 2, micro = 0)
   }
 }
