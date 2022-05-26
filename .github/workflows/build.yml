@@ -66,9 +66,9 @@ jobs:
           target: ${{ matrix.target }}
           arch: ${{ matrix.arch }}
           script: |
-            ./gradlew connectedCheck -Pdevelopment=false
-            ./gradlew connectedCheck -Pdevelopment=false -PenabledFeatures=feature2
-            ./gradlew connectedCheck -Pdevelopment=false -PenabledFeatures=
+            ./gradlew clean connectedCheck -Pdevelopment=false
+            ./gradlew clean connectedCheck -Pdevelopment=false -PenabledFeatures=feature2
+            ./gradlew clean connectedCheck -Pdevelopment=false -PenabledFeatures=
 
   publish:
     name: Publish
