@@ -19,10 +19,16 @@ android {
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
+
+  testOptions {
+    unitTests {
+      returnDefaultValues true
+    }
+  }
 }
 
 dependencies {
-  implementation project(':colonist-samples:modular-android:modular-api')
+  implementation project(':colonist-samples:modular-android:modular-colony')
   for (feature in enabledFeatures.tokenize(',')) {
     implementation project(":colonist-samples:modular-android:modular-$feature")
   }

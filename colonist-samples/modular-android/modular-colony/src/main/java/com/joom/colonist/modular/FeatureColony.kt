@@ -28,4 +28,4 @@ import com.joom.colonist.modular.api.FeatureSettler
 @SelectSettlersByAnnotation(FeatureSettler::class)
 @AcceptSettlersViaCallback
 @ProduceSettlersViaConstructor
-annotation class FeatureColony
+internal annotation class FeatureColony
