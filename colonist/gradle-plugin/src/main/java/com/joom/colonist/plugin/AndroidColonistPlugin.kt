@@ -47,29 +47,23 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   private fun registerColonistWithVariantApi() {
     project.applicationAndroidComponents?.apply {
       onVariants { variant ->
-        variant.registerColonistTask(discoverSettlers = true, transformUnitTests = true)
+        variant.registerColonistTask(discoverSettlers = true)
       }
     }
 
     project.libraryAndroidComponents?.apply {
       onVariants { variant ->
-        variant.registerColonistTask(discoverSettlers = false, transformUnitTests = false)
+        variant.registerColonistTask(discoverSettlers = false)
       }
     }
   }
 
   @Suppress("UnstableApiUsage")
-  private fun Variant.registerColonistTask(discoverSettlers: Boolean, transformUnitTests: Boolean) {
+  private fun Variant.registerColonistTask(discoverSettlers: Boolean) {
     val taskProvider = project.registerTask<ColonistTransformClassesTask>("${name}ColonistTransformClasses")
     artifacts.use(taskProvider)
       .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
       .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
-
-    if (transformUnitTests && unitTest != null) {
-      unitTest!!.artifacts.use(taskProvider)
-        .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
-        .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
-    }
 
     taskProvider.configure { task ->
       task.discoverSettlers = discoverSettlers
