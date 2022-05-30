@@ -17,12 +17,51 @@
 package com.joom.colonist.processor.commons
 
 import com.joom.colonist.processor.descriptors.MethodDescriptor
+import com.joom.grip.mirrors.internalName
 import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.Label
+import org.objectweb.asm.Opcodes
 
 fun ClassVisitor.newMethod(access: Int, method: MethodDescriptor, body: GeneratorAdapter.() -> Unit) {
   GeneratorAdapter(this, access, method).apply {
     visitCode()
     body()
+    returnValue()
+    endMethod()
+  }
+}
+
+inline fun <reified T : Throwable> ClassVisitor.newMethodTryCatch(
+  access: Int,
+  method: MethodDescriptor,
+  noinline tryBody: GeneratorAdapter.() -> Unit,
+  noinline catch: GeneratorAdapter.() -> Unit,
+) {
+  newMethodTryCatch(access, method, T::class.java, tryBody, catch)
+}
+
+fun <T : Throwable> ClassVisitor.newMethodTryCatch(
+  access: Int,
+  method: MethodDescriptor,
+  catchThrowableType: Class<out T>,
+  body: GeneratorAdapter.() -> Unit,
+  catch: GeneratorAdapter.() -> Unit,
+) {
+  GeneratorAdapter(this, access, method).apply {
+    val bodyStart = Label()
+    val bodyEnd = Label()
+    val handlerStart = Label()
+    val handlerEnd = Label()
+    visitCode()
+    visitTryCatchBlock(bodyStart, bodyEnd, handlerStart, catchThrowableType.internalName)
+    visitLabel(bodyStart)
+    body()
+    visitLabel(bodyEnd)
+    visitJumpInsn(Opcodes.GOTO, handlerEnd)
+
+    visitLabel(handlerStart)
+    catch()
+    visitLabel(handlerEnd)
     returnValue()
     endMethod()
   }
