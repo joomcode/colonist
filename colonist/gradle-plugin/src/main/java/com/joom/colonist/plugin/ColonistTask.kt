@@ -63,6 +63,7 @@ open class ColonistTask : DefaultTask() {
       inputs = backupDirs,
       outputs = classesDirs,
       classpath = classpath,
+      discoveryClasspath = classpath,
       generationOutput = classesDirs.first(),
       bootClasspath = bootClasspath,
       projectName = name.orEmpty().replace(":colonistProcess", ":").replace(':', '$'),

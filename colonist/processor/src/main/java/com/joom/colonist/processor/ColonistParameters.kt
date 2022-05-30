@@ -22,6 +22,7 @@ data class ColonistParameters(
   val inputs: List<File>,
   val outputs: List<File>,
   val generationOutput: File,
+  val discoveryClasspath: List<File>,
   val classpath: List<File>,
   val bootClasspath: List<File>,
   val projectName: String,

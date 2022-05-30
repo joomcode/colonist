@@ -235,11 +235,11 @@ class ColonistProcessor(
   companion object {
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
-      val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+      val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath + parameters.discoveryClasspath)
 
       warmUpGripCaches(grip, parameters.inputs)
 
-      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs + parameters.classpath)
+      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs + parameters.discoveryClasspath)
 
       val colonyMarkerParser = ColonyMarkerParserImpl(
         grip = grip,
@@ -260,7 +260,7 @@ class ColonistProcessor(
 
       val settlerDiscoverer = SettlerDiscovererImpl(
         grip = grip,
-        inputs = parameters.inputs + parameters.classpath,
+        inputs = parameters.inputs + parameters.discoveryClasspath,
         settlerParser = settlerParser,
         errorReporter = errorReporter
       )

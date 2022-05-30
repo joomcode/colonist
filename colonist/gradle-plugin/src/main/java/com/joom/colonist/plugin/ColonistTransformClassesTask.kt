@@ -24,6 +24,10 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
 
   @get:InputFiles
   @get:Classpath
+  abstract val discoveryClasspath: ConfigurableFileCollection
+
+  @get:InputFiles
+  @get:Classpath
   abstract val classpath: ConfigurableFileCollection
 
   @get:InputFiles
@@ -48,8 +52,9 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
 
     val parameters = ColonistParameters(
       inputs = inputClasses.get().map { it.asFile },
-      outputs = listOf(output.get().asFile),
+      outputs = List(inputClasses.get().size) { output.get().asFile },
       generationOutput = output.get().asFile,
+      discoveryClasspath = discoveryClasspath.toList(),
       classpath = classpath.toList(),
       bootClasspath = bootClasspath.toList(),
       projectName = name.orEmpty().replace(":colonistProcess", ":").replace(':', '$'),

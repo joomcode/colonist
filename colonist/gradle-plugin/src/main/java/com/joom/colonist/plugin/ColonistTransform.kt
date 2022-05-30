@@ -52,13 +52,16 @@ class ColonistTransform(
       Format.DIRECTORY
     )
 
+    val classpath = invocation.referencedInputs.flatMap { input ->
+      input.jarInputs.map { it.file } + input.directoryInputs.map { it.file }
+    }
+
     val parameters = ColonistParameters(
       inputs = inputs.map { it.file },
       outputs = outputs,
       generationOutput = generationOutput,
-      classpath = invocation.referencedInputs.flatMap { input ->
-        input.jarInputs.map { it.file } + input.directoryInputs.map { it.file }
-      },
+      classpath = classpath,
+      discoveryClasspath = classpath,
       bootClasspath = extension.bootClasspath,
       projectName = invocation.context.variantName,
       discoverSettlers = true,
