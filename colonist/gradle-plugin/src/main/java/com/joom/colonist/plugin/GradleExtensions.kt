@@ -19,8 +19,13 @@ package com.joom.colonist.plugin
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.ArtifactCollection
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -59,4 +64,19 @@ val TaskContainer.compileTestJava: JavaCompile
 
 operator fun TaskContainer.get(name: String): Task? {
   return findByName(name)
+}
+
+fun Configuration.incomingJarArtifacts(componentFilter: ((ComponentIdentifier) -> Boolean)? = null): ArtifactCollection {
+  return incoming
+    .artifactView { configuration ->
+      configuration.attributes { attributes ->
+        @Suppress("UnstableApiUsage")
+        attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, AndroidArtifacts.ArtifactType.CLASSES_JAR.type)
+      }
+
+      componentFilter?.let {
+        configuration.componentFilter(it)
+      }
+    }
+    .artifacts
 }

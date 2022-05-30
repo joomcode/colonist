@@ -19,10 +19,8 @@ package com.joom.colonist.plugin
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.plugins.JavaPlugin
 
 class AndroidColonistPlugin : BaseColonistPlugin() {
@@ -70,13 +68,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       task.discoverSettlers = discoverSettlers
       task.classpath.setFrom(
         project.configurations.getByName("${name}RuntimeClasspath")
-          .incoming
-          .artifactView {
-            it.attributes { attributes ->
-              attributes.attribute(ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE, AndroidArtifacts.ArtifactType.CLASSES_JAR.type)
-            }
-          }
-          .artifacts
+          .incomingJarArtifacts()
           .artifactFiles
       )
       task.bootClasspath.setFrom(project.android.bootClasspath)
