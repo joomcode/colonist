@@ -18,7 +18,7 @@ package com.joom.colonist.processor.generation
 
 import com.joom.colonist.processor.commons.GeneratorAdapter
 import com.joom.colonist.processor.commons.Types
-import com.joom.colonist.processor.commons.newMethod
+import com.joom.colonist.processor.commons.newMethodTryCatch
 import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.descriptors.descriptor
 import com.joom.colonist.processor.model.Colony
@@ -93,7 +93,7 @@ class ColonyPatcher(
   }
 
   private fun generateColonyFounderDispatcherMethod(methods: Collection<ColonyMethod>) {
-    classVisitor.newMethod(Opcodes.ACC_PUBLIC, FOUND_METHOD) {
+    classVisitor.newMethodTryCatch<NoClassDefFoundError>(Opcodes.ACC_PUBLIC, FOUND_METHOD, tryBody = {
       loadArg(0)
       ifNull {
         for (method in methods) {
@@ -112,7 +112,9 @@ class ColonyPatcher(
           returnValue()
         }
       }
-    }
+    }, catch = {
+      throwException(Types.COLONIST_EXCEPTION_TYPE, "Failed to find colony delegate, is colonist plugin applied to application module?")
+    })
   }
 
   private class ColonyMethod(
