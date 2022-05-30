@@ -21,6 +21,7 @@ import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.variant.Variant
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.plugins.JavaPlugin
 
 class AndroidColonistPlugin : BaseColonistPlugin() {
@@ -64,12 +65,15 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
       .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
 
+    val runtimeClasspath = project.configurations.getByName("${name}RuntimeClasspath")
+
     taskProvider.configure { task ->
       task.discoverSettlers = discoverSettlers
+      task.discoveryClasspath.setFrom(
+        runtimeClasspath.incomingJarArtifacts { it is ProjectComponentIdentifier }.artifactFiles
+      )
       task.classpath.setFrom(
-        project.configurations.getByName("${name}RuntimeClasspath")
-          .incomingJarArtifacts()
-          .artifactFiles
+        runtimeClasspath.incomingJarArtifacts().artifactFiles
       )
       task.bootClasspath.setFrom(project.android.bootClasspath)
     }
