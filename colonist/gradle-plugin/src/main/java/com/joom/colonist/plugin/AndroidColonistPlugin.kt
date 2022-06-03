@@ -33,7 +33,9 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     }
 
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
-    if (AndroidGradlePluginVersionProvider.getCurrentPluginVersion() >= VARIANT_API_REQUIRED_VERSION) {
+
+    val androidComponents = project.androidComponents
+    if (androidComponents != null && androidComponents.pluginVersion >= VARIANT_API_REQUIRED_VERSION) {
       logger.info("Registering colonist with variant API")
 
       registerColonistWithVariantApi()
