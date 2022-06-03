@@ -18,13 +18,16 @@ package com.joom.colonist.processor.generation
 
 import com.joom.colonist.processor.commons.GeneratorAdapter
 import com.joom.colonist.processor.commons.Types
+import com.joom.colonist.processor.commons.invokeMethod
+import com.joom.colonist.processor.commons.newMethod
 import com.joom.colonist.processor.commons.newMethodTryCatch
+import com.joom.colonist.processor.commons.toMethodDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.descriptors.descriptor
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.watermark.WatermarkClassVisitor
-import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.isStatic
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
@@ -60,28 +63,23 @@ class ColonyPatcher(
       return null
     }
 
-    val isAcceptOrProduceMethod = colonies.any {
-      it.settlerAcceptor.matchesMethod(name, descriptor) || it.settlerProducer.matchesMethod(name, descriptor)
-    }
-
-    val newAccess = if (isAcceptOrProduceMethod) makeAccessPublic(access) else access
-
-    return super.visitMethod(newAccess, name, descriptor, signature, exceptions)
+    return super.visitMethod(access, name, descriptor, signature, exceptions)
   }
 
   override fun visitEnd() {
     val methods = composeColonyMethods(colonies)
     generateColonyFounderMethods(methods)
+    colonies.forEach { colony ->
+      if (colony.settlerAcceptor is Colony.CallbackMethod.Bridged) {
+        generateBridgeMethod(colony.type, colony.settlerAcceptor)
+      }
 
-    super.visitEnd()
-  }
-
-  private fun MethodMirror?.matchesMethod(name: String, descriptor: String): Boolean {
-    if (this == null) {
-      return false
+      if (colony.settlerProducer is Colony.CallbackMethod.Bridged) {
+        generateBridgeMethod(colony.type, colony.settlerProducer)
+      }
     }
 
-    return this.name == name && this.type.descriptor == descriptor
+    super.visitEnd()
   }
 
   private fun makeAccessPublic(access: Int): Int {
@@ -115,6 +113,26 @@ class ColonyPatcher(
     }, catch = {
       throwException(Types.COLONIST_EXCEPTION_TYPE, "Failed to find colony delegate, is colonist plugin applied to application module?")
     })
+  }
+
+  private fun generateBridgeMethod(type: Type, bridgedMethod: Colony.CallbackMethod.Bridged) {
+    classVisitor.newMethod(makeAccessPublic(bridgedMethod.method.access), bridgedMethod.bridge) {
+      if (!bridgedMethod.method.isStatic) {
+        loadThis()
+      }
+
+      bridgedMethod.method.parameters.forEachIndexed { index, _ ->
+        loadArg(index)
+      }
+
+      if (!bridgedMethod.method.isStatic) {
+        invokeMethod(type, bridgedMethod.method)
+      } else {
+        invokeStatic(type, bridgedMethod.method.toMethodDescriptor())
+      }
+
+      returnValue()
+    }
   }
 
   private class ColonyMethod(

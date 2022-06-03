@@ -16,6 +16,7 @@
 
 package com.joom.colonist.processor.model
 
+import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
 
@@ -23,6 +24,14 @@ data class Colony(
   val type: Type.Object,
   val delegate: Type.Object,
   val marker: ColonyMarker,
-  val settlerProducer: MethodMirror?,
-  val settlerAcceptor: MethodMirror?
-)
+  val settlerProducer: CallbackMethod?,
+  val settlerAcceptor: CallbackMethod?,
+) {
+
+  sealed class CallbackMethod {
+    abstract val method: MethodMirror
+
+    class Direct(override val method: MethodMirror) : CallbackMethod()
+    class Bridged(val bridge: MethodDescriptor, override val method: MethodMirror) : CallbackMethod()
+  }
+}

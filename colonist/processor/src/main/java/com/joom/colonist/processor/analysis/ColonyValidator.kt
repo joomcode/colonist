@@ -22,7 +22,6 @@ import com.joom.colonist.processor.model.ColonyMarker
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerAcceptor
 import com.joom.colonist.processor.model.SettlerProducer
-import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
 
 interface ColonyValidator {
@@ -41,7 +40,7 @@ class ColonyValidatorImpl(
     colonyType: Type.Object,
     colonyMarker: ColonyMarker,
     settlers: Collection<Settler>,
-    settlerProducer: MethodMirror?
+    settlerProducer: Colony.CallbackMethod?
   ) {
     if (settlerProducer != null) {
       return
@@ -65,7 +64,7 @@ class ColonyValidatorImpl(
     colonyType: Type.Object,
     colonyMarker: ColonyMarker,
     settlers: Collection<Settler>,
-    settlerAcceptor: MethodMirror?
+    settlerAcceptor: Colony.CallbackMethod?
   ) {
     if (settlerAcceptor != null) {
       return

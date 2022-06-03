@@ -19,9 +19,7 @@ package com.joom.colonist.processor.generation
 import com.joom.colonist.processor.commons.GeneratorAdapter
 import com.joom.colonist.processor.commons.StandaloneClassWriter
 import com.joom.colonist.processor.commons.Types
-import com.joom.colonist.processor.commons.contains
 import com.joom.colonist.processor.commons.exhaustive
-import com.joom.colonist.processor.commons.invokeMethod
 import com.joom.colonist.processor.commons.newMethod
 import com.joom.colonist.processor.commons.toMethodDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
@@ -32,6 +30,7 @@ import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.watermark.WatermarkClassVisitor
 import com.joom.grip.ClassRegistry
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.isStatic
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Opcodes
@@ -83,19 +82,14 @@ class ColonyDelegateGenerator(private val classRegistry: ClassRegistry) {
 
   private fun GeneratorAdapter.invokeProduceCallback(colony: Colony, settler: Settler) {
     val callback = colony.settlerProducer!!
-    val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
 
-    if (!isCallbackStatic) {
+    if (!callback.method.isStatic) {
       loadArg(0)
     }
 
     push(settler.type)
 
-    if (isCallbackStatic) {
-      invokeStatic(colony.type, callback.toMethodDescriptor())
-    } else {
-      invokeMethod(colony.type, callback)
-    }
+    invokeCallbackMethod(colony, callback)
   }
 
   private fun GeneratorAdapter.acceptSettler(colony: Colony, settler: Settler) {
@@ -109,16 +103,35 @@ class ColonyDelegateGenerator(private val classRegistry: ClassRegistry) {
 
   private fun GeneratorAdapter.invokeAcceptCallback(colony: Colony, settler: Settler) {
     val callback = colony.settlerAcceptor!!
-    val isCallbackStatic = Opcodes.ACC_STATIC in callback.access
 
-    checkCast(callback.parameters[0].type)
+    checkCast(callback.method.parameters[0].type)
 
-    if (isCallbackStatic) {
-      invokeStatic(colony.type, callback.toMethodDescriptor())
-    } else {
+    if (!callback.method.isStatic) {
       loadArg(0)
       swap(settler.type, colony.type)
-      invokeMethod(colony.type, callback)
+    }
+
+    invokeCallbackMethod(colony, callback)
+  }
+
+  private fun GeneratorAdapter.invokeCallbackMethod(colony: Colony, callbackMethod: Colony.CallbackMethod) {
+    val callableMethodDescriptor = computeCallableMethodDescriptor(callbackMethod)
+
+    if (callbackMethod.method.isStatic) {
+      invokeStatic(colony.type, callableMethodDescriptor)
+    } else {
+      invokeVirtual(colony.type, callableMethodDescriptor)
+    }
+  }
+
+  private fun computeCallableMethodDescriptor(callbackMethod: Colony.CallbackMethod): MethodDescriptor {
+    return when (callbackMethod) {
+      is Colony.CallbackMethod.Bridged -> {
+        callbackMethod.bridge
+      }
+      is Colony.CallbackMethod.Direct -> {
+        callbackMethod.method.toMethodDescriptor()
+      }
     }
   }
 }

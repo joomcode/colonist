@@ -17,6 +17,8 @@
 package com.joom.colonist.processor.analysis
 
 import com.joom.colonist.processor.commons.Types
+import com.joom.colonist.processor.commons.toMethodDescriptor
+import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
 import com.joom.grip.Grip
@@ -24,6 +26,7 @@ import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
 import com.joom.grip.mirrors.getObjectType
+import com.joom.grip.mirrors.isPublic
 
 interface ColonyParser {
   fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony
@@ -46,7 +49,7 @@ class ColonyParserImpl(
     mirror: ClassMirror,
     callbackAnnotationType: Type.Object,
     colonyAnnotationType: Type.Object
-  ): MethodMirror? {
+  ): Colony.CallbackMethod? {
     val methods = mirror.methods.filter { method ->
       method.annotations.any { annotation ->
         annotation.type == callbackAnnotationType && annotation.values["colonyAnnotation"] == colonyAnnotationType
@@ -70,7 +73,15 @@ class ColonyParserImpl(
       "Callback method ${method.name} in class ${mirror.type.className} must have a single argument for a settler"
     }
 
-    return method
+    return if (method.isPublic) {
+      Colony.CallbackMethod.Direct(method)
+    } else {
+      Colony.CallbackMethod.Bridged(computeBridgeMethodDescriptor(method), method)
+    }
+  }
+
+  private fun computeBridgeMethodDescriptor(method: MethodMirror): MethodDescriptor {
+    return method.toMethodDescriptor().copy(name = "__bridge__" + method.name)
   }
 
   private val Type.sanitizedInternalName: String
