@@ -21,7 +21,7 @@ ext {
   androidTargetSdkVersion = 30
   androidMinSdkVersion = 16
   androidBuildToolsVersion = '30.0.3'
-  androidToolsVersion = '7.2.0'
+  androidToolsVersion = '7.1.0'
 
   androidxAnnotationVersion = '1.2.0'
 }

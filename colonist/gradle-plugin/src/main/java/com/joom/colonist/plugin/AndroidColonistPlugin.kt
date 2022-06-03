@@ -93,6 +93,6 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   }
 
   private companion object {
-    private val VARIANT_API_REQUIRED_VERSION = AndroidPluginVersion(major = 7, minor = 2, micro = 0)
+    private val VARIANT_API_REQUIRED_VERSION = AndroidPluginVersion(major = 7, minor = 1, micro = 0)
   }
 }
