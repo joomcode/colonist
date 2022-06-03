@@ -63,7 +63,6 @@ class ColonistTransform(
       classpath = classpath,
       discoveryClasspath = classpath,
       bootClasspath = extension.bootClasspath,
-      projectName = invocation.context.variantName,
       discoverSettlers = true,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled,

@@ -66,7 +66,6 @@ open class ColonistTask : DefaultTask() {
       discoveryClasspath = classpath,
       generationOutput = classesDirs.first(),
       bootClasspath = bootClasspath,
-      projectName = name.orEmpty().replace(":colonistProcess", ":").replace(':', '$'),
       discoverSettlers = discoverSettlers,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled

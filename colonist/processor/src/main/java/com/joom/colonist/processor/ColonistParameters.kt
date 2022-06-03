@@ -25,7 +25,6 @@ data class ColonistParameters(
   val discoveryClasspath: List<File>,
   val classpath: List<File>,
   val bootClasspath: List<File>,
-  val projectName: String,
   val discoverSettlers: Boolean,
   val debug: Boolean,
   val info: Boolean

@@ -73,7 +73,6 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
       discoveryClasspath = discoveryClasspath.toList(),
       classpath = classpath.toList(),
       bootClasspath = bootClasspath.toList(),
-      projectName = name.orEmpty().replace(":colonistProcess", ":").replace(':', '$'),
       discoverSettlers = discoverSettlers,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled
