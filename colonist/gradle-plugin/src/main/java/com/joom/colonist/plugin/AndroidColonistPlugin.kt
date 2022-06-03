@@ -62,7 +62,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
 
   @Suppress("UnstableApiUsage")
   private fun Variant.registerColonistTask(discoverSettlers: Boolean) {
-    val taskProvider = project.registerTask<ColonistTransformClassesTask>("${name}ColonistTransformClasses")
+    val taskProvider = project.registerTask<ColonistTransformClassesTask>("colonistTransformClasses${name.replaceFirstChar { it.uppercaseChar() }}")
     artifacts.use(taskProvider)
       .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
       .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
