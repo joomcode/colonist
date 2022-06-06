@@ -23,8 +23,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import org.hamcrest.Matchers
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.containsString
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,5 +49,12 @@ open class MainActivityTest {
       onView(withId(R.id.text_view))
         .check(matches(allOf(matchers)))
     }
+  }
+
+  @Test
+  fun testColonyIsProcessed() {
+    val registry = AndroidTestColonistRegistry()
+
+    Assert.assertThat(registry.getRegisteredSettlers(), Matchers.containsInAnyOrder(FirstTestColonist::class.java, SecondTestColonist::class.java))
   }
 }
