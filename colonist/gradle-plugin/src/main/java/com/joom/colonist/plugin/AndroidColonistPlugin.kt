@@ -20,6 +20,7 @@ import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.variant.Component
 import com.android.build.api.variant.HasAndroidTest
+import com.android.build.api.variant.Variant
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -64,22 +65,38 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     }
   }
 
-  private fun <T> T.registerColonistTask(discoverSettlers: Boolean) where T : Component, T : HasAndroidTest {
-    val runtimeClasspath = project.configurations.named("${name}RuntimeClasspath")
+  private fun <T> T.registerColonistTask(discoverSettlers: Boolean) where T : Variant, T : HasAndroidTest {
+    val runtimeClasspath = runtimeClasspathConfiguration()
+
     registerColonistTask(
       discoverSettlers = discoverSettlers,
       classpathProvider = classpathProvider(runtimeClasspath),
       discoveryClasspathProvider = discoveryClasspathProvider(runtimeClasspath),
     )
 
+    unitTest?.let { unitTest ->
+      val unitTestRuntimeClasspath = unitTest.runtimeClasspathConfiguration()
+
+      unitTest.registerColonistTask(
+        discoverSettlers = discoverSettlers,
+        classpathProvider = classpathProvider(runtimeClasspath),
+        discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath)
+      )
+    }
+
     androidTest?.let { androidTest ->
-      val androidTestRuntimeClasspath = project.configurations.named("${androidTest.name}RuntimeClasspath")
+      val androidTestRuntimeClasspath = androidTest.runtimeClasspathConfiguration()
+
       androidTest.registerColonistTask(
         discoverSettlers = discoverSettlers,
         classpathProvider = classpathProvider(androidTestRuntimeClasspath),
         discoveryClasspathProvider = discoveryClasspathProvider(androidTestRuntimeClasspath) - discoveryClasspathProvider(runtimeClasspath)
       )
     }
+  }
+
+  private fun Component.runtimeClasspathConfiguration(): Provider<Configuration> {
+    return project.configurations.named(name + "RuntimeClasspath")
   }
 
   private fun classpathProvider(configuration: Provider<Configuration>): Provider<FileCollection> {
