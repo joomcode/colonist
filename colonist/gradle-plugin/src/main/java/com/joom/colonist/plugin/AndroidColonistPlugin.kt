@@ -18,11 +18,15 @@ package com.joom.colonist.plugin
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.MultipleArtifact
-import com.android.build.api.variant.Variant
+import com.android.build.api.variant.Component
+import com.android.build.api.variant.HasAndroidTest
 import org.gradle.api.GradleException
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.Provider
 
 class AndroidColonistPlugin : BaseColonistPlugin() {
   override fun apply(project: Project) {
@@ -60,23 +64,51 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     }
   }
 
+  private fun <T> T.registerColonistTask(discoverSettlers: Boolean) where T : Component, T : HasAndroidTest {
+    val runtimeClasspath = project.configurations.named("${name}RuntimeClasspath")
+    registerColonistTask(
+      discoverSettlers = discoverSettlers,
+      classpathProvider = classpathProvider(runtimeClasspath),
+      discoveryClasspathProvider = discoveryClasspathProvider(runtimeClasspath),
+    )
+
+    androidTest?.let { androidTest ->
+      val androidTestRuntimeClasspath = project.configurations.named("${androidTest.name}RuntimeClasspath")
+      androidTest.registerColonistTask(
+        discoverSettlers = discoverSettlers,
+        classpathProvider = classpathProvider(androidTestRuntimeClasspath),
+        discoveryClasspathProvider = discoveryClasspathProvider(androidTestRuntimeClasspath) - discoveryClasspathProvider(runtimeClasspath)
+      )
+    }
+  }
+
+  private fun classpathProvider(configuration: Provider<Configuration>): Provider<FileCollection> {
+    return configuration.map { it.incomingJarArtifacts().artifactFiles }
+  }
+
+  private fun discoveryClasspathProvider(configuration: Provider<Configuration>): Provider<FileCollection> {
+    return configuration.map { it.incomingJarArtifacts { it is ProjectComponentIdentifier }.artifactFiles }
+  }
+
+  private operator fun Provider<FileCollection>.minus(other: Provider<FileCollection>): Provider<FileCollection> {
+    return zip(other) { first, second -> first - second }
+  }
+
   @Suppress("UnstableApiUsage")
-  private fun Variant.registerColonistTask(discoverSettlers: Boolean) {
+  private fun Component.registerColonistTask(
+    discoverSettlers: Boolean,
+    classpathProvider: Provider<FileCollection>,
+    discoveryClasspathProvider: Provider<FileCollection>,
+  ) {
     val taskProvider = project.registerTask<ColonistTransformClassesTask>("colonistTransformClasses${name.replaceFirstChar { it.uppercaseChar() }}")
     artifacts.use(taskProvider)
       .wiredWith(ColonistTransformClassesTask::inputClasses, ColonistTransformClassesTask::output)
       .toTransform(MultipleArtifact.ALL_CLASSES_DIRS)
 
-    val runtimeClasspath = project.configurations.getByName("${name}RuntimeClasspath")
-
     taskProvider.configure { task ->
       task.discoverSettlers = discoverSettlers
-      task.discoveryClasspath.setFrom(
-        runtimeClasspath.incomingJarArtifacts { it is ProjectComponentIdentifier }.artifactFiles
-      )
-      task.classpath.setFrom(
-        runtimeClasspath.incomingJarArtifacts().artifactFiles
-      )
+      task.discoveryClasspath.setFrom(discoveryClasspathProvider)
+      task.classpath.setFrom(classpathProvider)
       task.bootClasspath.setFrom(project.android.bootClasspath)
     }
   }
