@@ -10,20 +10,10 @@ android {
     targetSdkVersion androidTargetSdkVersion
     versionCode 1
     versionName version
-
-    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
 }
 
 dependencies {
   implementation project(':colonist-samples:modular-android:modular-api')
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-  implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-
-  testImplementation "junit:junit:$junitVersion"
-
-  androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoVersion"
-  androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
-  androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
-  androidTestImplementation "androidx.test.ext:junit:$androidxTestExtJunitVersion"
 }

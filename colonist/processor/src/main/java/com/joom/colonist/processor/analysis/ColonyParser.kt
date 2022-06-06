@@ -16,43 +16,40 @@
 
 package com.joom.colonist.processor.analysis
 
-import com.joom.colonist.processor.ErrorReporter
 import com.joom.colonist.processor.commons.Types
+import com.joom.colonist.processor.commons.toMethodDescriptor
+import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
-import com.joom.colonist.processor.model.Settler
-import com.joom.colonist.processor.model.SettlerAcceptor
-import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.grip.Grip
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.MethodMirror
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getObjectType
+import com.joom.grip.mirrors.isPublic
 
 interface ColonyParser {
-  fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker, settlers: Collection<Settler>): Colony
+  fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony
 }
 
 class ColonyParserImpl(
   private val grip: Grip,
-  private val errorReporter: ErrorReporter
 ) : ColonyParser {
 
-  override fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker, settlers: Collection<Settler>): Colony {
+  override fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony {
     val mirror = grip.classRegistry.getClassMirror(colonyType)
+    val delegate = getObjectType("L__colonist__${colonyType.sanitizedInternalName}_${colonyMarker.type.sanitizedInternalName}_Delegate;")
     val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type)
     val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type)
 
-    validateSettlerProducer(colonyType, colonyMarker, settlers, settlerProducer)
-    validateSettlerAcceptor(colonyType, colonyMarker, settlers, settlerAcceptor)
-
-    return Colony(colonyType, colonyMarker, settlers, settlerProducer, settlerAcceptor)
+    return Colony(colonyType, delegate, colonyMarker, settlerProducer, settlerAcceptor)
   }
 
   private fun findColonyCallbackMethod(
     mirror: ClassMirror,
     callbackAnnotationType: Type.Object,
     colonyAnnotationType: Type.Object
-  ): MethodMirror? {
+  ): Colony.CallbackMethod? {
     val methods = mirror.methods.filter { method ->
       method.annotations.any { annotation ->
         annotation.type == callbackAnnotationType && annotation.values["colonyAnnotation"] == colonyAnnotationType
@@ -76,54 +73,17 @@ class ColonyParserImpl(
       "Callback method ${method.name} in class ${mirror.type.className} must have a single argument for a settler"
     }
 
-    return method
+    return if (method.isPublic) {
+      Colony.CallbackMethod.Direct(method)
+    } else {
+      Colony.CallbackMethod.Bridged(computeBridgeMethodDescriptor(method), method)
+    }
   }
 
-  private fun validateSettlerProducer(
-    colonyType: Type.Object,
-    colonyMarker: ColonyMarker,
-    settlers: Collection<Settler>,
-    settlerProducer: MethodMirror?
-  ) {
-    if (settlerProducer != null) {
-      return
-    }
-
-    val settlerTypesWithCallbackProducer = settlers.mapNotNull { settler ->
-      val producer = settler.overriddenSettlerProducer ?: colonyMarker.settlerProducer
-      settler.type.takeIf { producer is SettlerProducer.Callback }
-    }
-
-    if (settlerTypesWithCallbackProducer.isEmpty()) {
-      return
-    }
-
-    val colonyClassName = colonyType.className
-    val settlerClassNames = settlerTypesWithCallbackProducer.joinToString { it.className }
-    errorReporter.reportError("Colony $colonyClassName expected to have a producer callback for settlers [$settlerClassNames]")
+  private fun computeBridgeMethodDescriptor(method: MethodMirror): MethodDescriptor {
+    return method.toMethodDescriptor().copy(name = "__bridge__" + method.name)
   }
 
-  private fun validateSettlerAcceptor(
-    colonyType: Type.Object,
-    colonyMarker: ColonyMarker,
-    settlers: Collection<Settler>,
-    settlerAcceptor: MethodMirror?
-  ) {
-    if (settlerAcceptor != null) {
-      return
-    }
-
-    val settlerTypesWithCallbackAcceptor = settlers.mapNotNull { settler ->
-      val acceptor = settler.overriddenSettlerAcceptor ?: colonyMarker.settlerAcceptor
-      settler.type.takeIf { acceptor is SettlerAcceptor.Callback }
-    }
-
-    if (settlerTypesWithCallbackAcceptor.isEmpty()) {
-      return
-    }
-
-    val colonyClassName = colonyType.className
-    val settlerClassNames = settlerTypesWithCallbackAcceptor.joinToString { it.className }
-    errorReporter.reportError("Colony $colonyClassName expected to have an acceptor callback for settlers [$settlerClassNames]")
-  }
+  private val Type.sanitizedInternalName: String
+    get() = internalName.replace('/', '_')
 }

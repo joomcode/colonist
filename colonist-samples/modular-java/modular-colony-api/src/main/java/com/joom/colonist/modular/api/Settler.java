@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 SIA Joom
+ * Copyright 2022 SIA Joom
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package com.joom.colonist.modular
+package com.joom.colonist.modular.api;
 
-import com.joom.colonist.AcceptSettlersViaCallback
-import com.joom.colonist.Colony
-import com.joom.colonist.ProduceSettlersViaConstructor
-import com.joom.colonist.SelectSettlersByAnnotation
-import com.joom.colonist.modular.api.FeatureSettler
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Retention(AnnotationRetention.BINARY)
-@Target(AnnotationTarget.CLASS)
-@Colony
-@SelectSettlersByAnnotation(FeatureSettler::class)
-@AcceptSettlersViaCallback
-@ProduceSettlersViaConstructor
-annotation class FeatureColony
+@Retention(RetentionPolicy.CLASS)
+@Target(ElementType.TYPE)
+public @interface Settler {
+}

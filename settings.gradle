@@ -30,9 +30,15 @@ include ':colonist-samples:sample-java'
 include ':colonist-samples:sample-kotlin'
 include ':colonist-samples:modular-android:modular-api'
 include ':colonist-samples:modular-android:modular-app'
+include ':colonist-samples:modular-android:modular-colony'
 
 def featuresString = properties['enabledFeatures']?.toString() ?: ""
 def features = featuresString.tokenize(",")
 for (feature in features) {
   include ":colonist-samples:modular-android:modular-$feature"
 }
+
+include ":colonist-samples:modular-java:modular-java-app"
+include ":colonist-samples:modular-java:modular-colony"
+include ":colonist-samples:modular-java:modular-colony-api"
+include ":colonist-samples:modular-java:modular-settlers"

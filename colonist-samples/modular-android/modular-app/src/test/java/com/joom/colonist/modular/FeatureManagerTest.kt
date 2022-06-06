@@ -16,13 +16,21 @@
 
 package com.joom.colonist.modular
 
-import com.joom.colonist.ColonistException
+import com.joom.colonist.modular.feature1.Feature1
+import com.joom.colonist.modular.feature2.Feature2
+import org.junit.Assert
 import org.junit.Test
 
 class FeatureManagerTest {
-  @Test(expected = ColonistException::class)
+  @Test
   fun testFeatureManagerIsNotProcessed() {
-    // Unit tests aren't processed with the transform.
-    FeatureManager {}
+    val features = ArrayList<Any>()
+    FeatureManager {
+      features += it
+    }
+
+    Assert.assertEquals(2, features.size)
+    Assert.assertTrue(features.any { it is Feature1 })
+    Assert.assertTrue(features.any { it is Feature2 })
   }
 }

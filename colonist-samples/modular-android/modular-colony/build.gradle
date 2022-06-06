@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'com.joom.colonist.android'
+
+android {
+  compileSdkVersion androidCompileSdkVersion
+  buildToolsVersion androidBuildToolsVersion
+
+  defaultConfig {
+    minSdkVersion androidMinSdkVersion
+    targetSdkVersion androidTargetSdkVersion
+    versionCode 1
+    versionName version
+  }
+}
+
+dependencies {
+  api project(':colonist-samples:modular-android:modular-api')
+  implementation "com.joom.colonist:colonist-core:$version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+}

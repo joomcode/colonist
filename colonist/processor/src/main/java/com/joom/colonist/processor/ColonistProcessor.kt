@@ -21,6 +21,8 @@ import com.joom.colonist.processor.analysis.ColonyMarkerParser
 import com.joom.colonist.processor.analysis.ColonyMarkerParserImpl
 import com.joom.colonist.processor.analysis.ColonyParser
 import com.joom.colonist.processor.analysis.ColonyParserImpl
+import com.joom.colonist.processor.analysis.ColonyValidator
+import com.joom.colonist.processor.analysis.ColonyValidatorImpl
 import com.joom.colonist.processor.analysis.SettlerAcceptorParserImpl
 import com.joom.colonist.processor.analysis.SettlerDiscoverer
 import com.joom.colonist.processor.analysis.SettlerDiscovererImpl
@@ -30,8 +32,9 @@ import com.joom.colonist.processor.analysis.SettlerSelectorParserImpl
 import com.joom.colonist.processor.commons.StandaloneClassWriter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.commons.closeQuietly
+import com.joom.colonist.processor.generation.ClassProducer
+import com.joom.colonist.processor.generation.ColonyDelegateGenerator
 import com.joom.colonist.processor.generation.ColonyPatcher
-import com.joom.colonist.processor.generation.SettlerPatcher
 import com.joom.colonist.processor.logging.getLogger
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
@@ -40,6 +43,7 @@ import com.joom.colonist.processor.model.SettlerSelector
 import com.joom.grip.Grip
 import com.joom.grip.GripFactory
 import com.joom.grip.classes
+import com.joom.grip.io.DirectoryFileSink
 import com.joom.grip.io.FileSource
 import com.joom.grip.io.IoFactory
 import com.joom.grip.mirrors.Annotated
@@ -48,6 +52,7 @@ import com.joom.grip.mirrors.getObjectTypeByInternalName
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.streams.toList
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
@@ -56,11 +61,14 @@ import org.objectweb.asm.ClassWriter
 class ColonistProcessor(
   inputs: List<File>,
   outputs: List<File>,
+  generationOutput: File,
   private val grip: Grip,
   private val annotationIndex: AnnotationIndex,
   private val colonyMarkerParser: ColonyMarkerParser,
   private val colonyParser: ColonyParser,
+  private val colonyValidator: ColonyValidator,
   private val settlerDiscoverer: SettlerDiscoverer,
+  private val discoverSettlers: Boolean,
   private val errorReporter: ErrorReporter
 ) : Closeable {
 
@@ -72,10 +80,18 @@ class ColonistProcessor(
     source to sink
   }
 
+  private val generationSink = DirectoryFileSink(generationOutput)
+
   fun processClasses() {
     val colonies = findColonies()
     checkErrors()
-    copyAndPatchClasses(colonies)
+    val processedColonies = copyAndPatchClasses(colonies)
+
+    if (discoverSettlers) {
+      val coloniesWithSettlers = findSettlersForColonies(colonies, processedColonies)
+      checkErrors()
+      generateColonyDelegates(coloniesWithSettlers)
+    }
   }
 
   override fun close() {
@@ -83,12 +99,13 @@ class ColonistProcessor(
       it.first.closeQuietly()
       it.second.closeQuietly()
     }
+
+    generationSink.closeQuietly()
   }
 
   private fun findColonies(): Collection<Colony> {
     val markers = findColonyMarkers()
-    val markersWithSettlers = findSettlersForColonyMarkers(markers)
-    return findColonies(markersWithSettlers)
+    return findColonies(markers)
   }
 
   private fun findColonyMarkers(): Collection<ColonyMarker> {
@@ -103,29 +120,40 @@ class ColonistProcessor(
     }
   }
 
-  private fun findSettlersForColonyMarkers(colonyMarkers: Collection<ColonyMarker>): Collection<ColonyMarkerWithSettlers> {
+  private fun findSettlersForColonies(colonies: Collection<Colony>, processedColonies: Collection<Colony>): Collection<ColonyWithSettlers> {
+    val processedColoniesSet = processedColonies.toSet()
     val cache = ConcurrentHashMap<SettlerSelector, Collection<Settler>>()
-    return colonyMarkers
+    return colonies
       .parallelStream()
-      .map { marker ->
-        val selector = marker.settlerSelector
+      .map { colony ->
+        val selector = colony.marker.settlerSelector
         val settlers = cache.computeIfAbsent(selector) {
           settlerDiscoverer.discoverSettlers(selector)
         }
-        ColonyMarkerWithSettlers(marker, settlers)
+
+        if (!isColonyProcessed(colony, processedColoniesSet)) {
+          errorReporter.reportError("Colony ${colony.type.className} annotated by ${colony.marker.type.className} is not processed by colonist," +
+              " is colonist plugin applied to the module?")
+        }
+        colonyValidator.validateColony(colony, settlers)
+        ColonyWithSettlers(colony, settlers)
       }
       .toList()
   }
 
-  private fun findColonies(colonyMarkersWithSettlers: Collection<ColonyMarkerWithSettlers>): Collection<Colony> {
-    return colonyMarkersWithSettlers.flatMap { findColonies(it.colonyMarker, it.settlers) }
+  private fun isColonyProcessed(colony: Colony, processedColonies: Collection<Colony>): Boolean {
+    return processedColonies.contains(colony) || grip.classRegistry.getClassMirror(colony.type).interfaces.contains(Types.COLONY_FOUNDER_TYPE)
   }
 
-  private fun findColonies(colonyMarker: ColonyMarker, settlers: Collection<Settler>): Collection<Colony> {
+  private fun findColonies(colonyMarkers: Collection<ColonyMarker>): Collection<Colony> {
+    return colonyMarkers.flatMap { findColonies(it) }
+  }
+
+  private fun findColonies(colonyMarker: ColonyMarker): Collection<Colony> {
     val colonyTypes = annotationIndex.findClassesWithAnnotation(colonyMarker.type)
     return colonyTypes.mapNotNull { colonyType ->
       try {
-        colonyParser.parseColony(colonyType, colonyMarker, settlers)
+        colonyParser.parseColony(colonyType, colonyMarker)
       } catch (exception: Exception) {
         errorReporter.reportError(exception)
         null
@@ -133,7 +161,8 @@ class ColonistProcessor(
     }
   }
 
-  private fun copyAndPatchClasses(colonies: Collection<Colony>) {
+  private fun copyAndPatchClasses(colonies: Collection<Colony>): Collection<Colony> {
+    val processedColonies = ConcurrentLinkedQueue<Colony>()
     val colonyTypeToColoniesMap = colonies.groupBy { it.type }
     fileSourcesAndSinks.parallelStream().forEach { (fileSource, fileSink) ->
       logger.debug("Copy from {} to {}", fileSource, fileSink)
@@ -146,9 +175,10 @@ class ColonistProcessor(
               classReader, ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES, grip.classRegistry
             )
             val classType = getObjectTypeByInternalName(classReader.className)
-            val classVisitor = createClassVisitorForType(classType, classWriter, colonies, colonyTypeToColoniesMap)
+            val classVisitor = createClassVisitorForType(classType, classWriter, colonyTypeToColoniesMap)
             classReader.accept(classVisitor, ClassReader.SKIP_FRAMES)
             fileSink.createFile(path, classWriter.toByteArray())
+            processedColonies += colonyTypeToColoniesMap[classType].orEmpty()
           }
 
           FileSource.EntryType.FILE -> fileSink.createFile(path, fileSource.readFile(path))
@@ -160,21 +190,31 @@ class ColonistProcessor(
     }
 
     checkErrors()
+
+    return processedColonies
   }
 
   private fun createClassVisitorForType(
     type: Type.Object,
     input: ClassVisitor,
-    colonies: Collection<Colony>,
     colonyTypeToColoniesMap: Map<Type.Object, Collection<Colony>>
   ): ClassVisitor {
-    val visitor = colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
-    val isSettler = colonies.any { isSettler(it, type) }
-    return if (isSettler) SettlerPatcher(visitor) else visitor
+    return colonyTypeToColoniesMap[type]?.let { ColonyPatcher(input, it) } ?: input
   }
 
-  private fun isSettler(colony: Colony, type: Type.Object): Boolean {
-    return colony.settlers.any { it.type == type }
+  private fun generateColonyDelegates(coloniesWithSettlers: Collection<ColonyWithSettlers>) {
+    val classProducer = ClassProducer(generationSink, errorReporter)
+    coloniesWithSettlers.parallelStream().forEach { colonyWithSettlers ->
+      classProducer.produceClass(
+        colonyWithSettlers.colony.delegate.internalName, ColonyDelegateGenerator(grip.classRegistry).generate(
+          colony = colonyWithSettlers.colony,
+          settlers = colonyWithSettlers.settlers,
+        )
+      )
+    }
+
+    generationSink.flush()
+    checkErrors()
   }
 
   private fun checkErrors() {
@@ -187,19 +227,19 @@ class ColonistProcessor(
     return errorReporter.getErrors().joinToString("\n") { it.message.orEmpty() }
   }
 
-  private data class ColonyMarkerWithSettlers(
-    val colonyMarker: ColonyMarker,
+  private data class ColonyWithSettlers(
+    val colony: Colony,
     val settlers: Collection<Settler>
   )
 
   companion object {
     fun process(parameters: ColonistParameters) {
       val errorReporter = ErrorReporter()
-      val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath)
+      val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath + parameters.discoveryClasspath)
 
       warmUpGripCaches(grip, parameters.inputs)
 
-      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs)
+      val annotationIndex = buildAnnotationIndex(grip, parameters.inputs + parameters.discoveryClasspath)
 
       val colonyMarkerParser = ColonyMarkerParserImpl(
         grip = grip,
@@ -209,7 +249,7 @@ class ColonistProcessor(
       )
 
       val colonyParser = ColonyParserImpl(
-        grip = grip, errorReporter = errorReporter
+        grip = grip,
       )
 
       val settlerParser = SettlerParserImpl(
@@ -220,18 +260,26 @@ class ColonistProcessor(
 
       val settlerDiscoverer = SettlerDiscovererImpl(
         grip = grip,
-        inputs = parameters.inputs,
-        settlerParser = settlerParser
+        inputs = parameters.inputs + parameters.discoveryClasspath,
+        settlerParser = settlerParser,
+        errorReporter = errorReporter
+      )
+
+      val colonyValidator = ColonyValidatorImpl(
+        errorReporter = errorReporter,
       )
 
       ColonistProcessor(
         inputs = parameters.inputs,
         outputs = parameters.outputs,
+        generationOutput = parameters.generationOutput,
         grip = grip,
         annotationIndex = annotationIndex,
         colonyMarkerParser = colonyMarkerParser,
         colonyParser = colonyParser,
         settlerDiscoverer = settlerDiscoverer,
+        colonyValidator = colonyValidator,
+        discoverSettlers = parameters.discoverSettlers,
         errorReporter = errorReporter
       ).use {
         it.processClasses()

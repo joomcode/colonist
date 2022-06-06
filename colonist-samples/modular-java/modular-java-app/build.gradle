@@ -1,0 +1,19 @@
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.joom.colonist'
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+mainClassName = 'com.joom.colonist.modular.ColonistSample'
+
+dependencies {
+  implementation project(":colonist-samples:modular-java:modular-colony")
+  implementation project(":colonist-samples:modular-java:modular-settlers")
+  testImplementation "junit:junit:$junitVersion"
+}
+
+colonist {
+  processTest false
+  discoverSettlers true
+}

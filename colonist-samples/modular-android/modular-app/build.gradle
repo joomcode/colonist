@@ -19,10 +19,16 @@ android {
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
+
+  testOptions {
+    unitTests {
+      returnDefaultValues true
+    }
+  }
 }
 
 dependencies {
-  implementation project(':colonist-samples:modular-android:modular-api')
+  implementation project(':colonist-samples:modular-android:modular-colony')
   for (feature in enabledFeatures.tokenize(',')) {
     implementation project(":colonist-samples:modular-android:modular-$feature")
   }
@@ -31,6 +37,7 @@ dependencies {
 
   testImplementation "junit:junit:$junitVersion"
 
+  androidTestImplementation project(':colonist-samples:modular-android:modular-colony')
   androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoVersion"
   androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
   androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"

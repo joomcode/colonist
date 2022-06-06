@@ -27,7 +27,7 @@ jobs:
       - name: Configure JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
 
       - name: Publish bootstrap artifacts
         run: ./gradlew -p colonist check publishToMavenLocal -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
@@ -54,7 +54,7 @@ jobs:
       - name: Configure JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
 
       - name: Publish bootstrap artifacts
         run: ./gradlew -p colonist check publishToMavenLocal -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
@@ -85,7 +85,7 @@ jobs:
       - name: Configure JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
 
       - name: Upload Artifacts
         run: ./gradlew -p colonist publishMavenPublicationToSonatypeRepository -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}

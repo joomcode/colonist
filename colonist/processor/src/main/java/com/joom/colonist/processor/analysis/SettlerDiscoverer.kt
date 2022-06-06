@@ -16,6 +16,7 @@
 
 package com.joom.colonist.processor.analysis
 
+import com.joom.colonist.processor.ErrorReporter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerSelector
@@ -25,6 +26,7 @@ import com.joom.grip.classes
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.Type
 import com.joom.grip.mirrors.isInterface
+import com.joom.grip.mirrors.isPublic
 import java.io.File
 
 interface SettlerDiscoverer {
@@ -34,7 +36,8 @@ interface SettlerDiscoverer {
 class SettlerDiscovererImpl(
   private val grip: Grip,
   private val inputs: List<File>,
-  private val settlerParser: SettlerParser
+  private val settlerParser: SettlerParser,
+  private val errorReporter: ErrorReporter,
 ) : SettlerDiscoverer {
 
   override fun discoverSettlers(settlerSelector: SettlerSelector): Collection<Settler> {
@@ -47,14 +50,24 @@ class SettlerDiscovererImpl(
 
   private fun selectSettlersByAnnotation(annotationType: Type.Object): Collection<Settler> {
     val query = grip select classes from inputs where annotatedWith(annotationType)
-    return query.execute().classes.map {
+    return query.execute().classes.mapNotNull {
+      if (!it.isPublic) {
+        errorReporter.reportError("Settler selected by @${annotationType.className} should be a public class [${it.type.className}]")
+        return@mapNotNull null
+      }
+
       settlerParser.parseSettler(it.type)
     }
   }
 
   private fun selectSettlersBySuperType(superType: Type.Object): Collection<Settler> {
     val query = grip select classes from inputs where isSubtypeOf(superType)
-    return query.execute().classes.map {
+    return query.execute().classes.mapNotNull {
+      if (!it.isPublic) {
+        errorReporter.reportError("Settler selected by ${superType.className} should be a public class [${it.type.className}]")
+        return@mapNotNull null
+      }
+
       settlerParser.parseSettler(it.type)
     }
   }

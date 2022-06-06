@@ -31,6 +31,10 @@ class ErrorReporter {
     reportError(ProcessingException(errorMessage))
   }
 
+  fun reportError(errorMessage: String, cause: Throwable) {
+    reportError(ProcessingException(errorMessage, cause))
+  }
+
   fun reportError(error: Exception) {
     errors.add(error)
   }

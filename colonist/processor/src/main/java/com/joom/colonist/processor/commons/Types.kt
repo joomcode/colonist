@@ -18,6 +18,7 @@ package com.joom.colonist.processor.commons
 
 import com.joom.colonist.AcceptSettlersAndForget
 import com.joom.colonist.AcceptSettlersViaCallback
+import com.joom.colonist.ColonistException
 import com.joom.colonist.Colony
 import com.joom.colonist.OnAcceptSettler
 import com.joom.colonist.OnProduceSettler
@@ -50,4 +51,6 @@ object Types {
 
   val ON_PRODUCE_SETTLER_TYPE = getObjectType<OnProduceSettler>()
   val ON_ACCEPT_SETTLER_TYPE = getObjectType<OnAcceptSettler>()
+
+  val COLONIST_EXCEPTION_TYPE = getObjectType<ColonistException>()
 }
