@@ -9,7 +9,7 @@ ext {
   jsr305Version = '3.0.2'
   asmVersion = '9.2'
   gripVersion = '0.8.3'
-  logbackVersion = '1.2.3'
+  logbackVersion = '1.2.11'
 
   junitVersion = '4.13.2'
   androidxEspressoVersion = '3.4.0'
