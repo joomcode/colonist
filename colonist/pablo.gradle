@@ -1,6 +1,11 @@
 apply plugin: 'io.michaelrocks.pablo'
 
+def shadowEnabled = project.providers.gradleProperty("pablo.shadow.enabled").map { it.toBoolean() }
 configurations.getByName("relocate") { relocateConfiguration ->
+  if (shadowEnabled.get()) {
+    return
+  }
+
   configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(relocateConfiguration)
   configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(relocateConfiguration)
 }
