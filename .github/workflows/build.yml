@@ -88,4 +88,10 @@ jobs:
           java-version: 11
 
       - name: Upload Artifacts
-        run: ./gradlew -p colonist publishMavenPublicationToSonatypeRepository -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
+        run: |
+          ./gradlew -p colonist \
+          annotations:publishMavenPublicationToSonatypeRepository \
+          core:publishMavenPublicationToSonatypeRepository \
+          gradle-plugin:publishMavenPublicationToSonatypeRepository \
+          processor:publishMavenPublicationToSonatypeRepository \
+          -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
