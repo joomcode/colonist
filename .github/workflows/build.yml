@@ -4,10 +4,8 @@ on: [ push, pull_request ]
 env:
   GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false -Dkotlin.incremental=false"
   PABLO_OPTS: |
-    -Ppablo.repository.maven.name=Sonatype \
-    -Ppablo.repository.maven.url=https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/ \
-    -Ppablo.repository.maven.username=${{ secrets.SONATYPE_USERNAME }} \
-    -Ppablo.repository.maven.password=${{ secrets.SONATYPE_PASSWORD }} \
+    -PsonatypeUsername=${{ secrets.SONATYPE_USERNAME }} \
+    -PsonatypePassword=${{ secrets.SONATYPE_PASSWORD }} \
     -Ppablo.signing.keyId=${{ secrets.SIGNING_KEY_ID }} \
     -Ppablo.signing.password=${{ secrets.SIGNING_PASSWORD }} \
     -Ppablo.signing.secretKey='${{ secrets.SIGNING_SECRET_KEY }}'
@@ -88,10 +86,4 @@ jobs:
           java-version: 11
 
       - name: Upload Artifacts
-        run: |
-          ./gradlew -p colonist \
-          annotations:publishMavenPublicationToSonatypeRepository \
-          core:publishMavenPublicationToSonatypeRepository \
-          gradle-plugin:publishMavenPublicationToSonatypeRepository \
-          processor:publishMavenPublicationToSonatypeRepository \
-          -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
+        run: ./gradlew -p colonist publishToSonatype -Ppablo.shadow.enabled=true ${{ env.PABLO_OPTS }}
