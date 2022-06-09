@@ -17,9 +17,6 @@
 package com.joom.colonist.modular
 
 import com.joom.colonist.ColonistException
-import com.joom.colonist.modular.feature1.Feature1
-import com.joom.colonist.modular.feature2.Feature2
-import org.junit.Assert
 import org.junit.Test
 
 class FeatureManagerTest {
