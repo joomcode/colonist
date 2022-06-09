@@ -74,16 +74,6 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       discoveryClasspathProvider = discoveryClasspathProvider(runtimeClasspath),
     )
 
-    unitTest?.let { unitTest ->
-      val unitTestRuntimeClasspath = unitTest.runtimeClasspathConfiguration()
-
-      unitTest.registerColonistTask(
-        discoverSettlers = discoverSettlers,
-        classpathProvider = classpathProvider(runtimeClasspath),
-        discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath)
-      )
-    }
-
     androidTest?.let { androidTest ->
       val androidTestRuntimeClasspath = androidTest.runtimeClasspathConfiguration()
 
