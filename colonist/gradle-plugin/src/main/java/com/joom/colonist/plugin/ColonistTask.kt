@@ -60,12 +60,12 @@ open class ColonistTask : DefaultTask() {
     validate()
 
     val parameters = ColonistParameters(
-      inputs = backupDirs,
-      outputs = classesDirs,
-      classpath = classpath,
-      discoveryClasspath = classpath,
-      generationOutput = classesDirs.first(),
-      bootClasspath = bootClasspath,
+      inputs = backupDirs.map { it.toPath() },
+      outputs = classesDirs.map { it.toPath() },
+      classpath = classpath.map { it.toPath() },
+      discoveryClasspath = classpath.map { it.toPath() },
+      generationOutput = classesDirs.first().toPath(),
+      bootClasspath = bootClasspath.map { it.toPath() },
       discoverSettlers = discoverSettlers,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled

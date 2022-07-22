@@ -57,12 +57,12 @@ class ColonistTransform(
     }
 
     val parameters = ColonistParameters(
-      inputs = inputs.map { it.file },
-      outputs = outputs,
-      generationOutput = generationOutput,
-      classpath = classpath,
-      discoveryClasspath = classpath,
-      bootClasspath = extension.bootClasspath,
+      inputs = inputs.map { it.file.toPath() },
+      outputs = outputs.map { it.toPath() },
+      generationOutput = generationOutput.toPath(),
+      classpath = classpath.map { it.toPath() },
+      discoveryClasspath = classpath.map { it.toPath() },
+      bootClasspath = extension.bootClasspath.map { it.toPath() },
       discoverSettlers = true,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled,

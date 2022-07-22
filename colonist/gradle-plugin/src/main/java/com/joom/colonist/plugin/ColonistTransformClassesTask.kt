@@ -67,12 +67,12 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
     cleanOutput()
 
     val parameters = ColonistParameters(
-      inputs = inputClasses.get().map { it.asFile },
-      outputs = List(inputClasses.get().size) { output.get().asFile },
-      generationOutput = output.get().asFile,
-      discoveryClasspath = discoveryClasspath.toList(),
-      classpath = classpath.toList(),
-      bootClasspath = bootClasspath.toList(),
+      inputs = inputClasses.get().map { it.asFile.toPath() },
+      outputs = List(inputClasses.get().size) { output.get().asFile.toPath() },
+      generationOutput = output.get().asFile.toPath(),
+      discoveryClasspath = discoveryClasspath.map { it.toPath() },
+      classpath = classpath.map { it.toPath() },
+      bootClasspath = bootClasspath.map { it.toPath() },
       discoverSettlers = discoverSettlers,
       debug = logger.isDebugEnabled,
       info = logger.isInfoEnabled

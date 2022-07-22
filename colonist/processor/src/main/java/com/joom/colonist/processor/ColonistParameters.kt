@@ -16,15 +16,15 @@
 
 package com.joom.colonist.processor
 
-import java.io.File
+import java.nio.file.Path
 
 data class ColonistParameters(
-  val inputs: List<File>,
-  val outputs: List<File>,
-  val generationOutput: File,
-  val discoveryClasspath: List<File>,
-  val classpath: List<File>,
-  val bootClasspath: List<File>,
+  val inputs: List<Path>,
+  val outputs: List<Path>,
+  val generationOutput: Path,
+  val discoveryClasspath: List<Path>,
+  val classpath: List<Path>,
+  val bootClasspath: List<Path>,
   val discoverSettlers: Boolean,
   val debug: Boolean,
   val info: Boolean

@@ -50,7 +50,7 @@ import com.joom.grip.mirrors.Annotated
 import com.joom.grip.mirrors.Type
 import com.joom.grip.mirrors.getObjectTypeByInternalName
 import java.io.Closeable
-import java.io.File
+import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.streams.toList
@@ -59,9 +59,9 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 
 class ColonistProcessor(
-  inputs: List<File>,
-  outputs: List<File>,
-  generationOutput: File,
+  inputs: List<Path>,
+  outputs: List<Path>,
+  generationOutput: Path,
   private val grip: Grip,
   private val annotationIndex: AnnotationIndex,
   private val colonyMarkerParser: ColonyMarkerParser,
@@ -132,8 +132,10 @@ class ColonistProcessor(
         }
 
         if (!isColonyProcessed(colony, processedColoniesSet)) {
-          errorReporter.reportError("Colony ${colony.type.className} annotated by ${colony.marker.type.className} is not processed by colonist," +
-              " is colonist plugin applied to the module?")
+          errorReporter.reportError(
+            "Colony ${colony.type.className} annotated by ${colony.marker.type.className} is not processed by colonist," +
+                " is colonist plugin applied to the module?"
+          )
         }
         colonyValidator.validateColony(colony, settlers)
         ColonyWithSettlers(colony, settlers)
@@ -237,7 +239,7 @@ class ColonistProcessor(
       val errorReporter = ErrorReporter()
       val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath + parameters.discoveryClasspath)
 
-      warmUpGripCaches(grip, parameters.inputs)
+      warmUpGripCaches(grip, parameters.inputs + parameters.discoveryClasspath)
 
       val annotationIndex = buildAnnotationIndex(grip, parameters.inputs + parameters.discoveryClasspath)
 
@@ -286,14 +288,14 @@ class ColonistProcessor(
       }
     }
 
-    private fun warmUpGripCaches(grip: Grip, inputs: List<File>) {
-      inputs.flatMap { grip.fileRegistry.findTypesForFile(it) }
+    private fun warmUpGripCaches(grip: Grip, inputs: List<Path>) {
+      inputs.flatMap { grip.fileRegistry.findTypesForPath(it) }
         .parallelStream()
         .map { grip.classRegistry.getClassMirror(it) }
         .toList()
     }
 
-    private fun buildAnnotationIndex(grip: Grip, inputs: List<File>): AnnotationIndex {
+    private fun buildAnnotationIndex(grip: Grip, inputs: List<Path>): AnnotationIndex {
       return AnnotationIndex.build {
         val query = grip select classes from inputs where annotated()
         for (mirror in query.execute().classes) {
