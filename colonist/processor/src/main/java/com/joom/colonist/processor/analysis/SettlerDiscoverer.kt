@@ -27,7 +27,7 @@ import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.Type
 import com.joom.grip.mirrors.isInterface
 import com.joom.grip.mirrors.isPublic
-import java.io.File
+import java.nio.file.Path
 
 interface SettlerDiscoverer {
   fun discoverSettlers(settlerSelector: SettlerSelector): Collection<Settler>
@@ -35,7 +35,7 @@ interface SettlerDiscoverer {
 
 class SettlerDiscovererImpl(
   private val grip: Grip,
-  private val inputs: List<File>,
+  private val inputs: List<Path>,
   private val settlerParser: SettlerParser,
   private val errorReporter: ErrorReporter,
 ) : SettlerDiscoverer {
