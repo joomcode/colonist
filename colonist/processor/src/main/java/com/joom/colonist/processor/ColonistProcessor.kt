@@ -235,8 +235,7 @@ class ColonistProcessor(
   )
 
   companion object {
-    fun process(parameters: ColonistParameters) {
-      val errorReporter = ErrorReporter()
+    fun process(parameters: ColonistParameters, errorReporter: ErrorReporter = ErrorReporter()) {
       val grip = GripFactory.INSTANCE.create(parameters.inputs + parameters.classpath + parameters.bootClasspath + parameters.discoveryClasspath)
 
       warmUpGripCaches(grip, parameters.inputs + parameters.discoveryClasspath)
