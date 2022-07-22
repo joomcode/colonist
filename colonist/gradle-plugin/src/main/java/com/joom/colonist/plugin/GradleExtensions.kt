@@ -60,8 +60,12 @@ val SourceSetContainer.main: SourceSet
 val SourceSetContainer.test: SourceSet
   get() = getByName("test")
 
+val TaskContainer.classes: Task
+  get() = getByName("classes")
 val TaskContainer.compileJava: JavaCompile
   get() = getByName("compileJava") as JavaCompile
+val TaskContainer.testClasses: Task
+  get() = getByName("testClasses")
 val TaskContainer.compileTestJava: JavaCompile
   get() = getByName("compileTestJava") as JavaCompile
 

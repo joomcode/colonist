@@ -53,15 +53,15 @@ class JavaColonistPlugin : BaseColonistPlugin() {
 
   private fun setupColonistForJava(discoverSettlers: Boolean) {
     logger.info("Setting up Colonist task for Java project {}...", project.name)
-    createTasks(project.sourceSets.main, project.tasks.compileJava, discoverSettlers)
+    createTasks(project.sourceSets.main, project.tasks.compileJava, project.tasks.classes, discoverSettlers)
   }
 
   private fun setupColonistForJavaTest(discoverSettlers: Boolean) {
     logger.info("Setting up Colonist task for Java test project {}...", project.name)
-    createTasks(project.sourceSets.test, project.tasks.compileTestJava, discoverSettlers, "test")
+    createTasks(project.sourceSets.test, project.tasks.compileTestJava, project.tasks.testClasses, discoverSettlers, "test")
   }
 
-  private fun createTasks(sourceSet: SourceSet, compileTask: JavaCompile, discoverSettlers: Boolean, nameSuffix: String = "") {
+  private fun createTasks(sourceSet: SourceSet, compileTask: JavaCompile, classesTask: Task, discoverSettlers: Boolean, nameSuffix: String = "") {
     val suffix = nameSuffix.capitalized()
     val colonistDir = File(project.buildDir, getColonistRelativePath(nameSuffix))
     val classesDirs = getClassesDirs(sourceSet.output)
@@ -86,7 +86,7 @@ class JavaColonistPlugin : BaseColonistPlugin() {
       classesDirs = classesDirs,
       backupDirs = backupDirs
     )
-    configureTasks(colonistTask, backupTask, compileTask)
+    configureTasks(colonistTask, backupTask, compileTask, classesTask)
   }
 
   private fun getColonistRelativePath(suffix: String): String {
@@ -105,11 +105,12 @@ class JavaColonistPlugin : BaseColonistPlugin() {
     }
   }
 
-  private fun configureTasks(colonistTask: ColonistTask, backupTask: BackupClassesTask, compileTask: Task) {
+  private fun configureTasks(colonistTask: ColonistTask, backupTask: BackupClassesTask, compileTask: Task, classesTask: Task) {
+    backupTask.dependsOn(compileTask)
     colonistTask.mustRunAfter(compileTask)
     colonistTask.dependsOn(compileTask)
     colonistTask.dependsOn(backupTask)
-    compileTask.finalizedBy(colonistTask)
+    classesTask.dependsOn(colonistTask)
 
     val cleanBackupTask = project.tasks["clean${backupTask.name.capitalized()}"]!!
     val cleanColonistTask = project.tasks["clean${colonistTask.name.capitalized()}"]!!
