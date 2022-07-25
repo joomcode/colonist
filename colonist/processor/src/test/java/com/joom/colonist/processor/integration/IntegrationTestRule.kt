@@ -20,9 +20,6 @@ import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.ErrorReporter
 import com.joom.colonist.processor.ProcessingException
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
@@ -54,7 +51,7 @@ class IntegrationTestRule(
     val reporter = ErrorReporter()
     processProject(sourceCodeDir, reporter, discoverSettlers = discoverSettlers)
 
-    reporter.getErrors().shouldBeEmpty()
+    reporter.shouldNotHaveErrors()
   }
 
   fun assertInvalidProject(sourceCodeDir: String, message: String, discoverSettlers: Boolean = true) {
@@ -175,11 +172,6 @@ class IntegrationTestRule(
   private fun after() {
     cleanDir(compiledFilesDirectory)
     cleanDir(processedDirectory)
-  }
-
-  private fun ErrorReporter.shouldContainErrorMessage(message: String) {
-    getErrors().shouldHaveSize(1)
-    getErrors().first().message shouldBe message
   }
 
   companion object {
