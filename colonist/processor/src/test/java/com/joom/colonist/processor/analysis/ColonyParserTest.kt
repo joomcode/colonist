@@ -25,10 +25,13 @@ import com.joom.colonist.ProduceSettlersAsClasses
 import com.joom.colonist.ProduceSettlersViaCallback
 import com.joom.colonist.SelectSettlersByAnnotation
 import com.joom.colonist.processor.integration.JvmRuntimeUtil
+import com.joom.colonist.processor.model.Colony.CallbackMethod
 import com.joom.grip.GripFactory
 import com.joom.grip.mirrors.getObjectType
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.matchers.types.shouldBeInstanceOf
 import java.nio.file.Path
 import java.nio.file.Paths
 import org.junit.Test
@@ -98,6 +101,52 @@ class ColonyParserTest {
     )
   }
 
+  @Test
+  fun `colony with non-class produce callback parameter raises an error`() {
+    shouldThrow<IllegalArgumentException> {
+      colonyParser.parseColony(
+        colonyType = getObjectType<NonClassProduceParameterTypeColony>(),
+        colonyMarker = markerParser.parseColonyMarker(getObjectType<ProduceColony>())
+      )
+    }.shouldHaveMessage(
+      "Callback method callback in class com.joom.colonist.processor.analysis.ColonyParserTest\$NonClassProduceParameterTypeColony " +
+          "must have a single argument of type java.lang.Class"
+    )
+  }
+
+  @Test
+  fun `colony with non-class accept class callback parameter raises an error`() {
+    shouldThrow<IllegalArgumentException> {
+      colonyParser.parseColony(
+        colonyType = getObjectType<NonClassAcceptParameterTypeColony>(),
+        colonyMarker = markerParser.parseColonyMarker(getObjectType<AcceptColony>())
+      )
+    }.shouldHaveMessage(
+      "Callback method callback in class com.joom.colonist.processor.analysis.ColonyParserTest\$NonClassAcceptParameterTypeColony " +
+          "must have a single argument of type java.lang.Class"
+    )
+  }
+
+  @Test
+  fun `colony with class produce callback parameter does not raise an error`() {
+    val colony = colonyParser.parseColony(
+      colonyType = getObjectType<ValidProduceColony>(),
+      colonyMarker = markerParser.parseColonyMarker(getObjectType<ProduceColony>())
+    )
+
+    colony.settlerProducer.shouldBeInstanceOf<CallbackMethod.Direct>().method.name shouldBe "callback"
+  }
+
+  @Test
+  fun `colony with class accept callback parameter does not raise an error`() {
+    val colony = colonyParser.parseColony(
+      colonyType = getObjectType<ValidAcceptColony>(),
+      colonyMarker = markerParser.parseColonyMarker(getObjectType<AcceptColony>())
+    )
+
+    colony.settlerAcceptor.shouldBeInstanceOf<CallbackMethod.Direct>().method.name shouldBe "callback"
+  }
+
   private fun createColonyParser(): ColonyParser {
     return ColonyParserImpl(grip)
   }
@@ -164,5 +213,35 @@ class ColonyParserTest {
   class MultipleArgumentsAcceptCallbackColony {
     @OnAcceptSettler(colonyAnnotation = AcceptColony::class)
     fun callback(first: Class<*>, second: Class<*>, third: Class<*>) = Unit
+  }
+
+  @Suppress("UNUSED_PARAMETER")
+  @ProduceColony
+  class NonClassProduceParameterTypeColony {
+    @OnProduceSettler(colonyAnnotation = ProduceColony::class)
+    fun callback(className: String) = Unit
+  }
+
+  @Suppress("UNUSED_PARAMETER")
+  @AcceptColony
+  class NonClassAcceptParameterTypeColony {
+    @OnAcceptSettler(colonyAnnotation = AcceptColony::class)
+    fun callback(className: String) = Unit
+  }
+
+  @Suppress("UNUSED_PARAMETER")
+  @AcceptColony
+  class ValidAcceptColony {
+    @OnAcceptSettler(colonyAnnotation = AcceptColony::class)
+    fun callback(clazz: Class<*>) = Unit
+  }
+
+  @Suppress("UNUSED_PARAMETER")
+  @ProduceColony
+  class ValidProduceColony {
+    @OnProduceSettler(colonyAnnotation = ProduceColony::class)
+    fun callback(clazz: Class<*>): Any {
+      return Unit
+    }
   }
 }

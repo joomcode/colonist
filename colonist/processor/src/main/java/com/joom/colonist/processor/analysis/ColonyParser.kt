@@ -21,6 +21,8 @@ import com.joom.colonist.processor.commons.toMethodDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
+import com.joom.colonist.processor.model.SettlerAcceptor
+import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.grip.Grip
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.MethodMirror
@@ -39,8 +41,8 @@ class ColonyParserImpl(
   override fun parseColony(colonyType: Type.Object, colonyMarker: ColonyMarker): Colony {
     val mirror = grip.classRegistry.getClassMirror(colonyType)
     val delegate = getObjectType("L__colonist__${colonyType.sanitizedInternalName}_${colonyMarker.type.sanitizedInternalName}_Delegate;")
-    val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type)
-    val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type)
+    val settlerProducer = findColonyCallbackMethod(mirror, Types.ON_PRODUCE_SETTLER_TYPE, colonyMarker.type, Types.CLASS_TYPE)
+    val settlerAcceptor = findColonyCallbackMethod(mirror, Types.ON_ACCEPT_SETTLER_TYPE, colonyMarker.type, computeAcceptParameterType(colonyMarker))
 
     return Colony(colonyType, delegate, colonyMarker, settlerProducer, settlerAcceptor)
   }
@@ -48,7 +50,8 @@ class ColonyParserImpl(
   private fun findColonyCallbackMethod(
     mirror: ClassMirror,
     callbackAnnotationType: Type.Object,
-    colonyAnnotationType: Type.Object
+    colonyAnnotationType: Type.Object,
+    requiredParameterType: Type.Object?,
   ): Colony.CallbackMethod? {
     val methods = mirror.methods.filter { method ->
       method.annotations.any { annotation ->
@@ -73,6 +76,12 @@ class ColonyParserImpl(
       "Callback method ${method.name} in class ${mirror.type.className} must have a single argument for a settler"
     }
 
+    if (requiredParameterType != null) {
+      require(method.parameters.first().type == requiredParameterType) {
+        "Callback method ${method.name} in class ${mirror.type.className} must have a single argument of type ${requiredParameterType.className}"
+      }
+    }
+
     return if (method.isPublic) {
       Colony.CallbackMethod.Direct(method)
     } else {
@@ -82,6 +91,14 @@ class ColonyParserImpl(
 
   private fun computeBridgeMethodDescriptor(method: MethodMirror): MethodDescriptor {
     return method.toMethodDescriptor().copy(name = "__bridge__" + method.name)
+  }
+
+  private fun computeAcceptParameterType(marker: ColonyMarker): Type.Object? {
+    return if (marker.settlerAcceptor is SettlerAcceptor.Callback && marker.settlerProducer is SettlerProducer.Class) {
+      Types.CLASS_TYPE
+    } else {
+      null
+    }
   }
 
   private val Type.sanitizedInternalName: String
