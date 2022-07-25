@@ -39,6 +39,7 @@ import com.joom.colonist.processor.logging.getLogger
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.ColonyMarker
 import com.joom.colonist.processor.model.Settler
+import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.model.SettlerSelector
 import com.joom.grip.Grip
 import com.joom.grip.GripFactory
@@ -122,13 +123,14 @@ class ColonistProcessor(
 
   private fun findSettlersForColonies(colonies: Collection<Colony>, processedColonies: Collection<Colony>): Collection<ColonyWithSettlers> {
     val processedColoniesSet = processedColonies.toSet()
-    val cache = ConcurrentHashMap<SettlerSelector, Collection<Settler>>()
+    val cache = ConcurrentHashMap<SettlerProducerWithSelector, Collection<Settler>>()
     return colonies
       .parallelStream()
       .map { colony ->
         val selector = colony.marker.settlerSelector
-        val settlers = cache.computeIfAbsent(selector) {
-          settlerDiscoverer.discoverSettlers(selector)
+        val producer = colony.marker.settlerProducer
+        val settlers = cache.computeIfAbsent(SettlerProducerWithSelector(producer, selector)) {
+          settlerDiscoverer.discoverSettlers(selector, producer)
         }
 
         if (!isColonyProcessed(colony, processedColoniesSet)) {
@@ -232,6 +234,11 @@ class ColonistProcessor(
   private data class ColonyWithSettlers(
     val colony: Colony,
     val settlers: Collection<Settler>
+  )
+
+  private data class SettlerProducerWithSelector(
+    val producer: SettlerProducer,
+    val selector: SettlerSelector,
   )
 
   companion object {

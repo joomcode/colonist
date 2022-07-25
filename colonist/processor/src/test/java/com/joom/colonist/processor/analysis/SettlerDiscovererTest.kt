@@ -52,4 +52,34 @@ class SettlerDiscovererTest {
           "public class [com.joom.colonist.processor.analysis.settlerdiscoverer.private_by_supertype.PrivateSettler]"
     )
   }
+
+  @Test
+  fun `abstract settlers selected by annotation and produced via constructor do not raise an error`() {
+    rule.assertValidProject("abstract_by_annotation")
+  }
+
+  @Test
+  fun `settlers selected by annotation without no arg constructor produced via constructor raise an error`() {
+    rule.assertInvalidProject(
+      "non_instantiable_by_annotation", "Settler selected by " +
+          "@com.joom.colonist.processor.analysis.settlerdiscoverer.non_instantiable_by_annotation.TestSettler and produced via constructor " +
+          "does not have public default constructor " +
+          "[com.joom.colonist.processor.analysis.settlerdiscoverer.non_instantiable_by_annotation.PrivateConstructorSettler]"
+    )
+  }
+
+  @Test
+  fun `abstract settlers selected by super type and produced via constructor do not raise an error`() {
+    rule.assertValidProject("abstract_by_supertype")
+  }
+
+  @Test
+  fun `settlers selected by super type without no arg constructor produced via constructor raise an error`() {
+    rule.assertInvalidProject(
+      "non_instantiable_by_supertype", "Settler selected by " +
+          "com.joom.colonist.processor.analysis.settlerdiscoverer.non_instantiable_by_supertype.TestSettler and produced via constructor " +
+          "does not have public default constructor " +
+          "[com.joom.colonist.processor.analysis.settlerdiscoverer.non_instantiable_by_supertype.PrivateConstructorSettler]"
+    )
+  }
 }

@@ -149,7 +149,7 @@ class IntegrationTestRule(
     )
     if (exitCode != ExitCode.OK) {
       val error = errorStream.toString(Charsets.UTF_8.name())
-      throw RuntimeException("Error $exitCode:\n${error}")
+      throw RuntimeException("Error $exitCode:\n$error")
     }
     return outputDirectory
   }
