@@ -23,14 +23,12 @@ import com.joom.colonist.processor.integration.shouldNotHaveErrors
 import com.joom.colonist.processor.model.Settler
 import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.model.SettlerSelector
-import com.joom.grip.Grip
 import com.joom.grip.GripFactory
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.getObjectTypeByInternalName
 import io.kotest.matchers.collections.shouldExist
 import io.kotest.matchers.collections.shouldHaveSingleElement
 import io.kotest.matchers.collections.shouldHaveSize
-import java.nio.file.Path
-import kotlin.io.path.name
 import org.junit.Rule
 import org.junit.Test
 
@@ -155,38 +153,33 @@ class SettlerDiscovererTest {
 
   private fun discoverSettlers(sourceCodeDir: String, selectorDescription: SelectorDescription, producer: SettlerProducer): Collection<Settler> {
     val reporter = ErrorReporter()
-    val (discoverer, resolver) = createDiscovererWithResolver(sourceCodeDir, reporter)
+    val discoverer = createDiscoverer(sourceCodeDir, reporter)
     reporter.shouldNotHaveErrors()
     val selector = when (selectorDescription) {
-      is SelectorDescription.SuperType -> SettlerSelector.SuperType(resolver.getType(selectorDescription.className))
-      is SelectorDescription.Annotation -> SettlerSelector.Annotation(resolver.getType(selectorDescription.className))
+      is SelectorDescription.SuperType -> SettlerSelector.SuperType(computeType(sourceCodeDir, selectorDescription.className))
+      is SelectorDescription.Annotation -> SettlerSelector.Annotation(computeType(sourceCodeDir, selectorDescription.className))
     }
 
     return discoverer.discoverSettlers(selector, producer)
   }
 
-  private fun createDiscovererWithResolver(sourceCodeDir: String, errorReporter: ErrorReporter): Pair<SettlerDiscoverer, ClassResolver> {
+  private fun computeType(sourceCodeDir: String, name: String): Type.Object {
+    val fullClassName = "$PACKAGE.${sourceCodeDir}.$name"
+
+    return getObjectTypeByInternalName(fullClassName.replace(".", "/"))
+  }
+
+  private fun createDiscoverer(sourceCodeDir: String, errorReporter: ErrorReporter): SettlerDiscoverer {
     val path = rule.compileProject(sourceCodeDir).normalize()
     val grip = GripFactory.INSTANCE.create(listOf(path) + JvmRuntimeUtil.computeRuntimeClasspath())
     val settlerParser = SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
 
-    val discoverer = SettlerDiscovererImpl(grip, inputs = listOf(path), settlerParser = settlerParser, errorReporter = errorReporter)
-    val resolver = ClassResolver(path, grip)
-
-    return discoverer to resolver
+    return SettlerDiscovererImpl(grip, inputs = listOf(path), settlerParser = settlerParser, errorReporter = errorReporter)
   }
 
   private sealed class SelectorDescription {
     class SuperType(val className: String) : SelectorDescription()
     class Annotation(val className: String) : SelectorDescription()
-  }
-
-  private class ClassResolver(private val path: Path, private val grip: Grip) {
-    fun getType(name: String): Type.Object {
-      val fullClassName = "$PACKAGE.${path.last().name}.$name"
-
-      return grip.fileRegistry.findTypesForPath(path).find { it.className == fullClassName } ?: error("Failed to find class $name in $path")
-    }
   }
 
   private companion object {
