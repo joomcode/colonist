@@ -174,7 +174,7 @@ class IntegrationTestRule(
 
   private fun after() {
     cleanDir(compiledFilesDirectory)
-//    cleanDir(processedDirectory)
+    cleanDir(processedDirectory)
   }
 
   private fun ErrorReporter.shouldContainErrorMessage(message: String) {
