@@ -97,14 +97,22 @@ class SettlerDiscovererTest {
 
   @Test
   fun `does not return abstract settlers selected by super type and produced via constructor`() {
-    val settlers = discoverSettlers("abstract_by_supertype", SelectorDescription.SuperType("TestSettler"), SettlerProducer.Constructor)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_supertype",
+      selector = SettlerSelector.SuperType(computeType("abstract_by_supertype", "TestSettler")),
+      producer = SettlerProducer.Constructor
+    )
 
     settlers.shouldHaveSingleElement { it.type.className.endsWith("ConcreteSettler") }
   }
 
   @Test
   fun `returns all settlers selected by super type and produced as classes`() {
-    val settlers = discoverSettlers("abstract_by_supertype", SelectorDescription.SuperType("TestSettler"), SettlerProducer.Class)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_supertype",
+      selector = SettlerSelector.SuperType(computeType("abstract_by_supertype", "TestSettler")),
+      producer = SettlerProducer.Class
+    )
 
     settlers.shouldHaveSize(4)
     settlers.shouldExist { it.type.className.endsWith("TestSettler") }
@@ -115,7 +123,11 @@ class SettlerDiscovererTest {
 
   @Test
   fun `returns all settlers selected by super type and produced as callback`() {
-    val settlers = discoverSettlers("abstract_by_supertype", SelectorDescription.SuperType("TestSettler"), SettlerProducer.Callback)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_supertype",
+      selector = SettlerSelector.SuperType(computeType("abstract_by_supertype", "TestSettler")),
+      producer = SettlerProducer.Callback
+    )
 
     settlers.shouldHaveSize(4)
     settlers.shouldExist { it.type.className.endsWith("TestSettler") }
@@ -126,14 +138,22 @@ class SettlerDiscovererTest {
 
   @Test
   fun `does not return abstract settlers selected by annotation and produced via constructor`() {
-    val settlers = discoverSettlers("abstract_by_annotation", SelectorDescription.Annotation("TestSettler"), SettlerProducer.Constructor)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_annotation",
+      selector = SettlerSelector.Annotation(computeType("abstract_by_annotation", "TestSettler")),
+      producer = SettlerProducer.Constructor
+    )
 
     settlers.shouldHaveSingleElement { it.type.className.endsWith("ConcreteSettler") }
   }
 
   @Test
   fun `returns all settlers selected by annotation and produced as classes`() {
-    val settlers = discoverSettlers("abstract_by_annotation", SelectorDescription.Annotation("TestSettler"), SettlerProducer.Class)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_annotation",
+      selector = SettlerSelector.Annotation(computeType("abstract_by_annotation", "TestSettler")),
+      producer = SettlerProducer.Class
+    )
 
     settlers.shouldHaveSize(3)
     settlers.shouldExist { it.type.className.endsWith("AbstractSettler") }
@@ -143,7 +163,11 @@ class SettlerDiscovererTest {
 
   @Test
   fun `returns all settlers selected by annotation and produced as callback`() {
-    val settlers = discoverSettlers("abstract_by_annotation", SelectorDescription.Annotation("TestSettler"), SettlerProducer.Callback)
+    val settlers = discoverSettlers(
+      sourceCodeDir = "abstract_by_annotation",
+      selector = SettlerSelector.Annotation(computeType("abstract_by_annotation", "TestSettler")),
+      producer = SettlerProducer.Callback
+    )
 
     settlers.shouldHaveSize(3)
     settlers.shouldExist { it.type.className.endsWith("AbstractSettler") }
@@ -151,20 +175,16 @@ class SettlerDiscovererTest {
     settlers.shouldExist { it.type.className.endsWith("ConcreteSettler") }
   }
 
-  private fun discoverSettlers(sourceCodeDir: String, selectorDescription: SelectorDescription, producer: SettlerProducer): Collection<Settler> {
+  private fun discoverSettlers(sourceCodeDir: String, selector: SettlerSelector, producer: SettlerProducer): Collection<Settler> {
     val reporter = ErrorReporter()
     val discoverer = createDiscoverer(sourceCodeDir, reporter)
     reporter.shouldNotHaveErrors()
-    val selector = when (selectorDescription) {
-      is SelectorDescription.SuperType -> SettlerSelector.SuperType(computeType(sourceCodeDir, selectorDescription.className))
-      is SelectorDescription.Annotation -> SettlerSelector.Annotation(computeType(sourceCodeDir, selectorDescription.className))
-    }
 
     return discoverer.discoverSettlers(selector, producer)
   }
 
   private fun computeType(sourceCodeDir: String, name: String): Type.Object {
-    val fullClassName = "$PACKAGE.${sourceCodeDir}.$name"
+    val fullClassName = "$PACKAGE.$sourceCodeDir.$name"
 
     return getObjectTypeByInternalName(fullClassName.replace(".", "/"))
   }
@@ -175,11 +195,6 @@ class SettlerDiscovererTest {
     val settlerParser = SettlerParserImpl(grip, SettlerProducerParserImpl, SettlerAcceptorParserImpl)
 
     return SettlerDiscovererImpl(grip, inputs = listOf(path), settlerParser = settlerParser, errorReporter = errorReporter)
-  }
-
-  private sealed class SelectorDescription {
-    class SuperType(val className: String) : SelectorDescription()
-    class Annotation(val className: String) : SelectorDescription()
   }
 
   private companion object {
