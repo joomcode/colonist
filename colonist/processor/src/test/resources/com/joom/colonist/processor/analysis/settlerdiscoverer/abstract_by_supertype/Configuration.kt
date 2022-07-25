@@ -10,6 +10,8 @@ abstract class AbstractSettler : TestSettler
 
 interface InterfaceSettler : TestSettler
 
+class ConcreteSettler : TestSettler
+
 interface TestSettler
 
 @Colony

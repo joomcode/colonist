@@ -12,6 +12,9 @@ abstract class AbstractSettler
 @TestSettler
 interface InterfaceSettler
 
+@TestSettler
+class ConcreteSettler
+
 annotation class TestSettler
 
 @Colony
