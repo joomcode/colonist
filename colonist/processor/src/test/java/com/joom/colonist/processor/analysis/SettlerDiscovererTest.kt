@@ -26,16 +26,30 @@ class SettlerDiscovererTest {
   val rule = IntegrationTestRule("com.joom.colonist.processor.analysis.settlerdiscoverer")
 
   @Test
-  fun `public settlers do not raise an error`() {
-    rule.assertValidProject("publicsettler")
+  fun `public settlers selected by annotation do not raise an error`() {
+    rule.assertValidProject("public_by_annotation")
   }
 
   @Test
-  fun `private settler raises an error`() {
+  fun `public settlers selected by super type do not raise an error`() {
+    rule.assertValidProject("public_by_supertype")
+  }
+
+  @Test
+  fun `private settlers selected by annotation raise an error`() {
     rule.assertInvalidProject(
-      "privatesettler", "Settler selected by " +
-          "@com.joom.colonist.processor.analysis.settlerdiscoverer.privatesettler.TestSettler should be a " +
-          "public class [com.joom.colonist.processor.analysis.settlerdiscoverer.privatesettler.PrivateSettler]"
+      "private_by_annotation", "Settler selected by " +
+          "@com.joom.colonist.processor.analysis.settlerdiscoverer.private_by_annotation.TestSettler should be a " +
+          "public class [com.joom.colonist.processor.analysis.settlerdiscoverer.private_by_annotation.PrivateSettler]"
+    )
+  }
+
+  @Test
+  fun `private settlers selected by super type raise an error`() {
+    rule.assertInvalidProject(
+      "private_by_supertype", "Settler selected by " +
+          "com.joom.colonist.processor.analysis.settlerdiscoverer.private_by_supertype.TestSettler should be a " +
+          "public class [com.joom.colonist.processor.analysis.settlerdiscoverer.private_by_supertype.PrivateSettler]"
     )
   }
 }

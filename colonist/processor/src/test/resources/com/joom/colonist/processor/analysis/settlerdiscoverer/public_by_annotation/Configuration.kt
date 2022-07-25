@@ -1,4 +1,4 @@
-package com.joom.colonist.processor.analysis.settlerdiscoverer.publicsettler
+package com.joom.colonist.processor.analysis.settlerdiscoverer.public_by_annotation
 
 import com.joom.colonist.AcceptSettlersViaCallback
 import com.joom.colonist.Colony
