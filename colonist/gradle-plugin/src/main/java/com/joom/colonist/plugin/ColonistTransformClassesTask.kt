@@ -74,8 +74,6 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
       classpath = classpath.map { it.toPath() },
       bootClasspath = bootClasspath.map { it.toPath() },
       discoverSettlers = discoverSettlers,
-      debug = logger.isDebugEnabled,
-      info = logger.isInfoEnabled
     )
 
     logger.info("Starting Colonist processor: {}", parameters)

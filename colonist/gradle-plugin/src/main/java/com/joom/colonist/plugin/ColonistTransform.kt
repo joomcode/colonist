@@ -64,8 +64,6 @@ class ColonistTransform(
       discoveryClasspath = classpath.map { it.toPath() },
       bootClasspath = extension.bootClasspath.map { it.toPath() },
       discoverSettlers = true,
-      debug = logger.isDebugEnabled,
-      info = logger.isInfoEnabled,
     )
     logger.info("Starting Colonist processor: {}", parameters)
     try {
