@@ -19,4 +19,4 @@ package com.joom.colonist.modular.ants
 import com.joom.colonist.modular.AntSettler
 
 @AntSettler
-class BalaAnt : NamedAnt("Bala")
+object BalaAnt : NamedAnt("Bala")

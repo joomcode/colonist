@@ -19,4 +19,4 @@ package com.joom.colonist.modular.ants
 import com.joom.colonist.modular.AntSettler
 
 @AntSettler
-class Z4195Ant : NamedAnt("Z")
+object Z4195Ant : NamedAnt("Z")
