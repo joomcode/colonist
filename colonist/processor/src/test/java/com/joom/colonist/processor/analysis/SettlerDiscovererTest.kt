@@ -81,6 +81,11 @@ class SettlerDiscovererTest {
   }
 
   @Test
+  fun `kotlin objects selected by annotation without no arg constructor produced via constructor do not raise an error`() {
+    rule.assertValidProject("kotlin_object_by_annotation")
+  }
+
+  @Test
   fun `abstract settlers selected by super type and produced via constructor do not raise an error`() {
     rule.assertValidProject("abstract_by_supertype")
   }
@@ -93,6 +98,11 @@ class SettlerDiscovererTest {
           "does not have public default constructor " +
           "[com.joom.colonist.processor.analysis.settlerdiscoverer.non_instantiable_by_supertype.PrivateConstructorSettler]"
     )
+  }
+
+  @Test
+  fun `kotlin objects selected by super type without no arg constructor produced via constructor do not raise an error`() {
+    rule.assertValidProject("kotlin_object_by_supertype")
   }
 
   @Test
@@ -137,6 +147,18 @@ class SettlerDiscovererTest {
   }
 
   @Test
+  fun `returns kotlin object settlers selected super type and produced via constructor`() {
+    val settlers = discoverSettlers(
+      sourceCodeDir = "kotlin_object_by_supertype",
+      selector = SettlerSelector.SuperType(computeType("kotlin_object_by_supertype", "TestSettler")),
+      producer = SettlerProducer.Constructor
+    )
+
+    settlers.shouldHaveSize(1)
+    settlers.shouldExist { it.type.className.endsWith("ObjectSettler") && it.isKotlinObject }
+  }
+
+  @Test
   fun `does not return abstract settlers selected by annotation and produced via constructor`() {
     val settlers = discoverSettlers(
       sourceCodeDir = "abstract_by_annotation",
@@ -173,6 +195,18 @@ class SettlerDiscovererTest {
     settlers.shouldExist { it.type.className.endsWith("AbstractSettler") }
     settlers.shouldExist { it.type.className.endsWith("InterfaceSettler") }
     settlers.shouldExist { it.type.className.endsWith("ConcreteSettler") }
+  }
+
+  @Test
+  fun `returns kotlin object settlers selected by annotation and produced via constructor`() {
+    val settlers = discoverSettlers(
+      sourceCodeDir = "kotlin_object_by_annotation",
+      selector = SettlerSelector.Annotation(computeType("kotlin_object_by_annotation", "TestSettler")),
+      producer = SettlerProducer.Constructor
+    )
+
+    settlers.shouldHaveSize(1)
+    settlers.shouldExist { it.type.className.endsWith("ObjectSettler") && it.isKotlinObject }
   }
 
   private fun discoverSettlers(sourceCodeDir: String, selector: SettlerSelector, producer: SettlerProducer): Collection<Settler> {
