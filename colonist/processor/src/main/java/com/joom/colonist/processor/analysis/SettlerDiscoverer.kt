@@ -19,18 +19,20 @@ package com.joom.colonist.processor.analysis
 import com.joom.colonist.processor.ErrorReporter
 import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.model.Settler
+import com.joom.colonist.processor.model.SettlerProducer
 import com.joom.colonist.processor.model.SettlerSelector
 import com.joom.grip.Grip
 import com.joom.grip.annotatedWith
 import com.joom.grip.classes
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.Type
+import com.joom.grip.mirrors.isAbstract
 import com.joom.grip.mirrors.isInterface
 import com.joom.grip.mirrors.isPublic
 import java.nio.file.Path
 
 interface SettlerDiscoverer {
-  fun discoverSettlers(settlerSelector: SettlerSelector): Collection<Settler>
+  fun discoverSettlers(settlerSelector: SettlerSelector, settlerProducer: SettlerProducer): Collection<Settler>
 }
 
 class SettlerDiscovererImpl(
@@ -40,19 +42,19 @@ class SettlerDiscovererImpl(
   private val errorReporter: ErrorReporter,
 ) : SettlerDiscoverer {
 
-  override fun discoverSettlers(settlerSelector: SettlerSelector): Collection<Settler> {
+  override fun discoverSettlers(settlerSelector: SettlerSelector, settlerProducer: SettlerProducer): Collection<Settler> {
     return when (settlerSelector) {
-      is SettlerSelector.Annotation -> selectSettlersByAnnotation(settlerSelector.annotationType)
-      is SettlerSelector.SuperType -> selectSettlersBySuperType(settlerSelector.superType)
+      is SettlerSelector.Annotation -> selectSettlersByAnnotation(settlerSelector)
+      is SettlerSelector.SuperType -> selectSettlersBySuperType(settlerSelector)
       is SettlerSelector.Registered -> TODO("Registered selectors aren't supported yet")
-    }
+    }.let { filterProducibleSettlers(it, settlerSelector, settlerProducer) }
   }
 
-  private fun selectSettlersByAnnotation(annotationType: Type.Object): Collection<Settler> {
-    val query = grip select classes from inputs where annotatedWith(annotationType)
+  private fun selectSettlersByAnnotation(selector: SettlerSelector.Annotation): Collection<Settler> {
+    val query = grip select classes from inputs where annotatedWith(selector.annotationType)
     return query.execute().classes.mapNotNull {
       if (!it.isPublic) {
-        errorReporter.reportError("Settler selected by @${annotationType.className} should be a public class [${it.type.className}]")
+        errorReporter.reportError("Settler selected by ${selector.describe()} should be a public class [${it.type.className}]")
         return@mapNotNull null
       }
 
@@ -60,15 +62,51 @@ class SettlerDiscovererImpl(
     }
   }
 
-  private fun selectSettlersBySuperType(superType: Type.Object): Collection<Settler> {
-    val query = grip select classes from inputs where isSubtypeOf(superType)
+  private fun selectSettlersBySuperType(selector: SettlerSelector.SuperType): Collection<Settler> {
+    val query = grip select classes from inputs where isSubtypeOf(selector.superType)
     return query.execute().classes.mapNotNull {
       if (!it.isPublic) {
-        errorReporter.reportError("Settler selected by ${superType.className} should be a public class [${it.type.className}]")
+        errorReporter.reportError("Settler selected by ${selector.describe()} should be a public class [${it.type.className}]")
         return@mapNotNull null
       }
 
       settlerParser.parseSettler(it.type)
+    }
+  }
+
+  private fun filterProducibleSettlers(settlers: Collection<Settler>, selector: SettlerSelector, producer: SettlerProducer): Collection<Settler> {
+    return settlers.filter { canBeProducedByProducer(it.type, selector, it.overriddenSettlerProducer ?: producer) }
+  }
+
+  private fun canBeProducedByProducer(settlerType: Type.Object, selector: SettlerSelector, producer: SettlerProducer): Boolean {
+    return when (producer) {
+      SettlerProducer.Callback,
+      SettlerProducer.Class -> true
+      SettlerProducer.Constructor -> {
+        val mirror = grip.classRegistry.getClassMirror(settlerType)
+
+        if (mirror.isInterface || mirror.isAbstract) {
+          return false
+        }
+
+        if (mirror.constructors.find { it.isPublic && it.parameters.isEmpty() } == null) {
+          errorReporter.reportError(
+            "Settler selected by ${selector.describe()} and produced " +
+                "via constructor does not have public default constructor [${settlerType.className}]"
+          )
+          return false
+        }
+
+        return true
+      }
+    }
+  }
+
+  private fun SettlerSelector.describe(): String {
+    return when (this) {
+      is SettlerSelector.Annotation -> "@${annotationType.className}"
+      SettlerSelector.Registered -> "registered selector"
+      is SettlerSelector.SuperType -> superType.className
     }
   }
 
