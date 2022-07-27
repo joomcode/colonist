@@ -34,6 +34,7 @@ import com.joom.grip.mirrors.getObjectType
 object Types {
   val OBJECT_TYPE = getObjectType<Any>()
   val CLASS_TYPE = getObjectType<Class<*>>()
+  val KOTLIN_METADATA_TYPE = getObjectType<Metadata>()
 
   val COLONY_TYPE = getObjectType<Colony>()
   val COLONY_FOUNDER_TYPE = getObjectType<ColonyFounder>()

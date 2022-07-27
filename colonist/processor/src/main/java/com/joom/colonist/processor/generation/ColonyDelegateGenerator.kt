@@ -22,6 +22,7 @@ import com.joom.colonist.processor.commons.Types
 import com.joom.colonist.processor.commons.exhaustive
 import com.joom.colonist.processor.commons.newMethod
 import com.joom.colonist.processor.commons.toMethodDescriptor
+import com.joom.colonist.processor.descriptors.FieldDescriptor
 import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.colonist.processor.model.Colony
 import com.joom.colonist.processor.model.Settler
@@ -67,11 +68,21 @@ class ColonyDelegateGenerator(private val classRegistry: ClassRegistry) {
   private fun GeneratorAdapter.produceSettler(colony: Colony, settler: Settler) {
     exhaustive(
       when (settler.overriddenSettlerProducer ?: colony.marker.settlerProducer) {
-        SettlerProducer.Constructor -> invokeDefaultConstructor(settler.type)
+        SettlerProducer.Constructor -> {
+          if (settler.isKotlinObject) {
+            getInstanceField(settler.type)
+          } else {
+            invokeDefaultConstructor(settler.type)
+          }
+        }
         SettlerProducer.Callback -> invokeProduceCallback(colony, settler)
         SettlerProducer.Class -> push(settler.type)
       }
     )
+  }
+
+  private fun GeneratorAdapter.getInstanceField(type: Type.Object) {
+    getStatic(type, FieldDescriptor("INSTANCE", type))
   }
 
   private fun GeneratorAdapter.invokeDefaultConstructor(type: Type.Object) {

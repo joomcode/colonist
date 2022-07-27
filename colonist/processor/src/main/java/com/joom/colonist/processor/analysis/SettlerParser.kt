@@ -16,6 +16,7 @@
 
 package com.joom.colonist.processor.analysis
 
+import com.joom.colonist.processor.commons.isKotlinObject
 import com.joom.colonist.processor.model.Settler
 import com.joom.grip.Grip
 import com.joom.grip.mirrors.Type
@@ -34,6 +35,7 @@ class SettlerParserImpl(
     val mirror = grip.classRegistry.getClassMirror(settlerType)
     val settlerProducer = mirror.getSettlerProducerOrNull(settlerProducerParser)
     val settlerAcceptor = mirror.getSettlerAcceptorOrNull(settlerAcceptorParser)
-    return Settler(settlerType, settlerProducer, settlerAcceptor)
+    val isKotlinObject = mirror.isKotlinObject()
+    return Settler(settlerType, isKotlinObject, settlerProducer, settlerAcceptor)
   }
 }

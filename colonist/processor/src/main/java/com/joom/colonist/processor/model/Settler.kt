@@ -20,6 +20,7 @@ import com.joom.grip.mirrors.Type
 
 data class Settler(
   val type: Type.Object,
+  val isKotlinObject: Boolean,
   val overriddenSettlerProducer: SettlerProducer?,
   val overriddenSettlerAcceptor: SettlerAcceptor?
 )

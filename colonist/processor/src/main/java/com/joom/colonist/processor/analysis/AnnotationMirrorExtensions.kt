@@ -25,6 +25,12 @@ inline fun <reified T : Any> AnnotationMirror.requireValue(name: String): T {
   return value
 }
 
+inline fun <reified T : Any> AnnotationMirror.optionalValue(name: String): T? {
+  val value = values[name] ?: return null
+  require(value is T) { "Value $name from $this is of type ${value.javaClass} but expected to have type ${T::class.java}" }
+  return value
+}
+
 fun AnnotationMirror.requireTypeObjectValue(name: String): Type.Object {
   val value = requireValue<Type>(name)
   return value as? Type.Object

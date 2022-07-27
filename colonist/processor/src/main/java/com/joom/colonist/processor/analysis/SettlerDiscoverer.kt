@@ -75,24 +75,24 @@ class SettlerDiscovererImpl(
   }
 
   private fun filterProducibleSettlers(settlers: Collection<Settler>, selector: SettlerSelector, producer: SettlerProducer): Collection<Settler> {
-    return settlers.filter { canBeProducedByProducer(it.type, selector, it.overriddenSettlerProducer ?: producer) }
+    return settlers.filter { canBeProducedByProducer(it, selector, it.overriddenSettlerProducer ?: producer) }
   }
 
-  private fun canBeProducedByProducer(settlerType: Type.Object, selector: SettlerSelector, producer: SettlerProducer): Boolean {
+  private fun canBeProducedByProducer(settler: Settler, selector: SettlerSelector, producer: SettlerProducer): Boolean {
     return when (producer) {
       SettlerProducer.Callback,
       SettlerProducer.Class -> true
       SettlerProducer.Constructor -> {
-        val mirror = grip.classRegistry.getClassMirror(settlerType)
+        val mirror = grip.classRegistry.getClassMirror(settler.type)
 
         if (mirror.isInterface || mirror.isAbstract) {
           return false
         }
 
-        if (mirror.constructors.find { it.isPublic && it.parameters.isEmpty() } == null) {
+        if (mirror.constructors.find { it.isPublic && it.parameters.isEmpty() } == null && !settler.isKotlinObject) {
           errorReporter.reportError(
             "Settler selected by ${selector.describe()} and produced " +
-                "via constructor does not have public default constructor [${settlerType.className}]"
+                "via constructor does not have public default constructor [${settler.type.className}]"
           )
           return false
         }
