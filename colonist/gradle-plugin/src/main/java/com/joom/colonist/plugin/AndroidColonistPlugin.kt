@@ -52,20 +52,22 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   }
 
   private fun registerColonistWithVariantApi() {
+    val extension = project.extensions.create("colonist", AndroidVariantColonistExtension::class.java)
+
     project.applicationAndroidComponents?.apply {
       onVariants { variant ->
-        variant.registerColonistTask(discoverSettlers = true)
+        variant.registerColonistTask(discoverSettlers = true, processTest = extension.processTest)
       }
     }
 
     project.libraryAndroidComponents?.apply {
       onVariants { variant ->
-        variant.registerColonistTask(discoverSettlers = false)
+        variant.registerColonistTask(discoverSettlers = false, processTest = extension.processTest)
       }
     }
   }
 
-  private fun <T> T.registerColonistTask(discoverSettlers: Boolean) where T : Variant, T : HasAndroidTest {
+  private fun <T> T.registerColonistTask(discoverSettlers: Boolean, processTest: Boolean) where T : Variant, T : HasAndroidTest {
     val runtimeClasspath = runtimeClasspathConfiguration()
 
     registerColonistTask(
@@ -81,6 +83,16 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
         discoverSettlers = discoverSettlers,
         classpathProvider = classpathProvider(androidTestRuntimeClasspath),
         discoveryClasspathProvider = discoveryClasspathProvider(androidTestRuntimeClasspath) - discoveryClasspathProvider(runtimeClasspath)
+      )
+    }
+
+    unitTest.takeIf { processTest }?.let { unitTest ->
+      val unitTestRuntimeClasspath = unitTest.runtimeClasspathConfiguration()
+
+      unitTest.registerColonistTask(
+        discoverSettlers = discoverSettlers,
+        classpathProvider = classpathProvider(runtimeClasspath),
+        discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath)
       )
     }
   }
