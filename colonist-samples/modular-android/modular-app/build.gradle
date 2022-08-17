@@ -27,6 +27,10 @@ android {
   }
 }
 
+colonist {
+  processTest = true
+}
+
 dependencies {
   implementation project(':colonist-samples:modular-android:modular-colony')
   for (feature in enabledFeatures.tokenize(',')) {
