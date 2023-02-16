@@ -3,7 +3,7 @@ ext.COLONIST_VERSION = "0.1.0-alpha20"
 
 ext {
   javaVersion = JavaVersion.VERSION_1_8
-  kotlinVersion = '1.6.10'
+  kotlinVersion = '1.8.10'
   pabloVersion = '1.3.1'
 
   jsr305Version = '3.0.2'
@@ -11,7 +11,7 @@ ext {
   gripVersion = '0.9.0'
   logbackVersion = '1.2.11'
   kotestVersion = '5.3.0'
-  kotlinMetadata = '0.5.0'
+  kotlinMetadata = '0.6.0'
 
   junitVersion = '4.13.2'
   androidxEspressoVersion = '3.4.0'

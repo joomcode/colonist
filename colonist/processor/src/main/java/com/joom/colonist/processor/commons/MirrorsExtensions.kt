@@ -24,8 +24,8 @@ import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.FieldMirror
 import com.joom.grip.mirrors.MethodMirror
 import kotlinx.metadata.Flag
-import kotlinx.metadata.jvm.KotlinClassHeader
 import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlinx.metadata.jvm.Metadata
 
 fun MethodMirror.toMethodDescriptor(): MethodDescriptor {
   return MethodDescriptor(name, type)
@@ -38,17 +38,17 @@ fun FieldMirror.toFieldDescriptor(): FieldDescriptor {
 fun ClassMirror.isKotlinObject(): Boolean {
   val metadata = annotations[Types.KOTLIN_METADATA_TYPE] ?: return false
 
-  val header = KotlinClassHeader(
-    kind = metadata.optionalValue("k"),
-    metadataVersion = metadata.requireValue("mv"),
-    data1 = metadata.optionalValue<List<String>>("d1")?.toTypedArray(),
-    data2 = metadata.optionalValue<List<String>>("d2")?.toTypedArray(),
-    extraString = metadata.optionalValue("xs"),
-    packageName = metadata.optionalValue("pn"),
-    extraInt = metadata.optionalValue("xi"),
+  val classMetadata = KotlinClassMetadata.read(
+    Metadata(
+      kind = metadata.optionalValue("k"),
+      metadataVersion = metadata.requireValue("mv"),
+      data1 = metadata.optionalValue<List<String>>("d1")?.toTypedArray(),
+      data2 = metadata.optionalValue<List<String>>("d2")?.toTypedArray(),
+      extraString = metadata.optionalValue("xs"),
+      packageName = metadata.optionalValue("pn"),
+      extraInt = metadata.optionalValue("xi"),
+    )
   )
-
-  val classMetadata = KotlinClassMetadata.read(header)
 
   return if (classMetadata is KotlinClassMetadata.Class) {
     Flag.Class.IS_OBJECT(classMetadata.toKmClass().flags)
