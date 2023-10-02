@@ -1,5 +1,5 @@
 ext.COLONIST_GROUP = "com.joom.colonist"
-ext.COLONIST_VERSION = "0.1.0-alpha21"
+ext.COLONIST_VERSION = "0.1.0-alpha22"
 
 ext {
   javaVersion = JavaVersion.VERSION_11
