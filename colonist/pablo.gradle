@@ -41,4 +41,8 @@ pablo {
       url = 'https://github.com/joomcode/colonist'
     }
   }
+
+  signing {
+    enabled.set(providers.gradleProperty("development").map { !it.toBoolean() })
+  }
 }
