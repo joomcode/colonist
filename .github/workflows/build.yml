@@ -32,6 +32,15 @@ jobs:
       - name: Publish bootstrap artifacts
         run: ./gradlew -p colonist check publishToMavenLocal ${{ env.PABLO_OPTS }}
 
+      - name: Run functional tests
+        run: ./gradlew -p colonist functionalTest -Ppablo.shadow.enabled=true
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: functional-test-report
+          path: colonist/build/reports/tests/functionalTest
+
       - name: Run unit tests
         run: ./gradlew check -Pdevelopment=false
 
