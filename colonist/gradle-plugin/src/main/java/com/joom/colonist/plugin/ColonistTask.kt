@@ -16,6 +16,7 @@
 
 package com.joom.colonist.plugin
 
+import com.joom.colonist.processor.ColonistOutputFactory
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.watermark.WatermarkChecker
@@ -59,12 +60,13 @@ open class ColonistTask : DefaultTask() {
   fun process() {
     validate()
 
+    val inputPaths = backupDirs.map { it.toPath() }
+    val outputPaths = classesDirs.map { it.toPath() }
     val parameters = ColonistParameters(
-      inputs = backupDirs.map { it.toPath() },
-      outputs = classesDirs.map { it.toPath() },
+      inputs = inputPaths,
+      outputFactory = ColonistOutputFactory.create(inputPaths, outputPaths, outputPaths.first()),
       classpath = classpath.map { it.toPath() },
       discoveryClasspath = classpath.map { it.toPath() },
-      generationOutput = classesDirs.first().toPath(),
       bootClasspath = bootClasspath.map { it.toPath() },
       discoverSettlers = discoverSettlers,
     )

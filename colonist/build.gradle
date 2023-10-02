@@ -1,3 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
   apply from: '../versions.gradle'
 
@@ -40,11 +44,8 @@ allprojects {
   apply plugin: "org.jlleitschuh.gradle.ktlint"
 
   gradle.projectsEvaluated {
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-      kotlinOptions {
-        jvmTarget = "1.8"
-        allWarningsAsErrors = true
-      }
+    tasks.withType(KotlinCompile).configureEach {
+      setCompilerOptions(it)
     }
   }
 }
@@ -87,5 +88,17 @@ afterEvaluate {
     subprojects.each {
       dependsOn(it.tasks.named("publishToMavenLocal"))
     }
+  }
+}
+
+tasks.withType(KotlinCompile).configureEach {
+  setCompilerOptions(it)
+}
+
+def setCompilerOptions(KotlinCompile task) {
+  task.compilerOptions {
+    jvmTarget.set(JvmTarget["Companion"].fromTarget(javaVersion.toString()))
+    apiVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
+    languageVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
   }
 }

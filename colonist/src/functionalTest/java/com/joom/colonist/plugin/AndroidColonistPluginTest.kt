@@ -43,6 +43,7 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
       return listOf(
         TestCase(agpVersion = "7.0.4", GradleDistribution.GRADLE_7_5, expectedTaskName = ":transformClassesWithColonistForDebug"),
         TestCase(agpVersion = "7.2.0", GradleDistribution.GRADLE_7_5, expectedTaskName = ":colonistTransformClassesDebug"),
+        TestCase(agpVersion = "8.1.2", GradleDistribution.GRADLE_8_0, expectedTaskName = ":colonistTransformClassesDebug"),
       )
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 SIA Joom
+ * Copyright 2023 SIA Joom
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.joom.colonist.processor
+package com.joom.colonist.processor.commons
 
-import java.nio.file.Path
-
-data class ColonistParameters(
-  val outputFactory: ColonistOutputFactory,
-  val inputs: List<Path>,
-  val discoveryClasspath: List<Path>,
-  val classpath: List<Path>,
-  val bootClasspath: List<Path>,
-  val discoverSettlers: Boolean,
-)
+inline fun <T, K, V, M : MutableMap<in K, in V>> Iterable<T>.associateByIndexedTo(
+  destination: M,
+  keySelector: (Int, T) -> K,
+  valueSelector: (Int, T) -> V
+): M {
+  forEachIndexed { index, element ->
+    destination.put(keySelector(index, element), valueSelector(index, element))
+  }
+  return destination
+}

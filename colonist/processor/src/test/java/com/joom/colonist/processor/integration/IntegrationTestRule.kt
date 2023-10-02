@@ -16,6 +16,7 @@
 
 package com.joom.colonist.processor.integration
 
+import com.joom.colonist.processor.ColonistOutputFactory
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.ErrorReporter
@@ -93,11 +94,10 @@ class IntegrationTestRule(
     val outputDirectory = processedDirectory.resolve(projectName)
     val parameters = ColonistParameters(
       inputs = listOf(compiled),
-      outputs = listOf(outputDirectory),
+      outputFactory = ColonistOutputFactory.create(outputDirectory),
       bootClasspath = classpath,
       discoveryClasspath = modules,
       classpath = emptyList(),
-      generationOutput = outputDirectory,
       discoverSettlers = discoverSettlers,
     )
 

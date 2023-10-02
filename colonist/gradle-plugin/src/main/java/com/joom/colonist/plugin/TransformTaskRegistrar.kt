@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 SIA Joom
+ * Copyright 2023 SIA Joom
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.joom.colonist.processor
+package com.joom.colonist.plugin
 
-import java.nio.file.Path
+import com.android.build.api.variant.Component
+import org.gradle.api.tasks.TaskProvider
 
-data class ColonistParameters(
-  val outputFactory: ColonistOutputFactory,
-  val inputs: List<Path>,
-  val discoveryClasspath: List<Path>,
-  val classpath: List<Path>,
-  val bootClasspath: List<Path>,
-  val discoverSettlers: Boolean,
-)
+internal interface TransformTaskRegistrar {
+  fun register(component: Component, taskProvider: TaskProvider<ColonistTransformClassesTask>)
+}
