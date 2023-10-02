@@ -15,6 +15,7 @@
  */
 
 @file:Suppress("deprecation")
+
 package com.joom.colonist.plugin
 
 import com.android.build.api.transform.Format
@@ -23,6 +24,7 @@ import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInvocation
+import com.joom.colonist.processor.ColonistOutputFactory
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
 import com.joom.colonist.processor.logging.getLogger
@@ -40,16 +42,19 @@ class ColonistTransform(
     }
 
     val inputs = invocation.inputs.flatMap { it.jarInputs + it.directoryInputs }
+    val inputPaths = inputs.map { it.file.toPath() }
     val outputs = inputs.map { input ->
       val format = if (input is JarInput) Format.JAR else Format.DIRECTORY
       invocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, format)
     }
 
-    val generationOutput = invocation.outputProvider.getContentLocation(
-      "gen-colonist",
-      setOf(QualifiedContent.DefaultContentType.CLASSES),
-      EnumSet.of(QualifiedContent.Scope.PROJECT),
-      Format.DIRECTORY
+    val outputFactory = ColonistOutputFactory.create(
+      inputPaths, outputs.map { it.toPath() }, invocation.outputProvider.getContentLocation(
+        "gen-colonist",
+        setOf(QualifiedContent.DefaultContentType.CLASSES),
+        EnumSet.of(QualifiedContent.Scope.PROJECT),
+        Format.DIRECTORY
+      ).toPath()
     )
 
     val classpath = invocation.referencedInputs.flatMap { input ->
@@ -57,9 +62,8 @@ class ColonistTransform(
     }
 
     val parameters = ColonistParameters(
-      inputs = inputs.map { it.file.toPath() },
-      outputs = outputs.map { it.toPath() },
-      generationOutput = generationOutput.toPath(),
+      inputs = inputPaths,
+      outputFactory = outputFactory,
       classpath = classpath.map { it.toPath() },
       discoveryClasspath = classpath.map { it.toPath() },
       bootClasspath = extension.bootClasspath.map { it.toPath() },

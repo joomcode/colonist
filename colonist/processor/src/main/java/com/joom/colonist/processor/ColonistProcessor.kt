@@ -44,7 +44,6 @@ import com.joom.colonist.processor.model.SettlerSelector
 import com.joom.grip.Grip
 import com.joom.grip.GripFactory
 import com.joom.grip.classes
-import com.joom.grip.io.DirectoryFileSink
 import com.joom.grip.io.FileSource
 import com.joom.grip.io.IoFactory
 import com.joom.grip.mirrors.Annotated
@@ -61,8 +60,7 @@ import org.objectweb.asm.ClassWriter
 
 class ColonistProcessor(
   inputs: List<Path>,
-  outputs: List<Path>,
-  generationOutput: Path,
+  outputFactory: ColonistOutputFactory,
   private val grip: Grip,
   private val annotationIndex: AnnotationIndex,
   private val colonyMarkerParser: ColonyMarkerParser,
@@ -75,13 +73,8 @@ class ColonistProcessor(
 
   private val logger = getLogger()
 
-  private val fileSourcesAndSinks = inputs.zip(outputs) { input, output ->
-    val source = IoFactory.createFileSource(input)
-    val sink = IoFactory.createFileSink(input, output)
-    source to sink
-  }
-
-  private val generationSink = DirectoryFileSink(generationOutput)
+  private val output = outputFactory.createOutput()
+  private val fileSourcesByInputs = inputs.associateWith { IoFactory.createFileSource(it) }
 
   fun processClasses() {
     val colonies = findColonies()
@@ -96,12 +89,11 @@ class ColonistProcessor(
   }
 
   override fun close() {
-    fileSourcesAndSinks.forEach {
-      it.first.closeQuietly()
-      it.second.closeQuietly()
+    output.closeQuietly()
+    fileSourcesByInputs.values.forEach {
+      it.closeQuietly()
     }
-
-    generationSink.closeQuietly()
+    grip.closeQuietly()
   }
 
   private fun findColonies(): Collection<Colony> {
@@ -168,7 +160,8 @@ class ColonistProcessor(
   private fun copyAndPatchClasses(colonies: Collection<Colony>): Collection<Colony> {
     val processedColonies = ConcurrentLinkedQueue<Colony>()
     val colonyTypeToColoniesMap = colonies.groupBy { it.type }
-    fileSourcesAndSinks.parallelStream().forEach { (fileSource, fileSink) ->
+    fileSourcesByInputs.entries.parallelStream().forEach { (input, fileSource) ->
+      val fileSink = output.getFileSink(input)
       logger.debug("Copy from {} to {}", fileSource, fileSink)
       fileSource.listFiles { path, type ->
         logger.debug("Copy file {} of type {}", path, type)
@@ -207,6 +200,7 @@ class ColonistProcessor(
   }
 
   private fun generateColonyDelegates(coloniesWithSettlers: Collection<ColonyWithSettlers>) {
+    val generationSink = output.getGenerationSink()
     val classProducer = ClassProducer(generationSink, errorReporter)
     coloniesWithSettlers.parallelStream().forEach { colonyWithSettlers ->
       classProducer.produceClass(
@@ -279,8 +273,7 @@ class ColonistProcessor(
 
       ColonistProcessor(
         inputs = parameters.inputs,
-        outputs = parameters.outputs,
-        generationOutput = parameters.generationOutput,
+        outputFactory = parameters.outputFactory,
         grip = grip,
         annotationIndex = annotationIndex,
         colonyMarkerParser = colonyMarkerParser,

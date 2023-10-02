@@ -19,9 +19,8 @@ package com.joom.colonist.processor
 import java.nio.file.Path
 
 data class ColonistParameters(
+  val outputFactory: ColonistOutputFactory,
   val inputs: List<Path>,
-  val outputs: List<Path>,
-  val generationOutput: Path,
   val discoveryClasspath: List<Path>,
   val classpath: List<Path>,
   val bootClasspath: List<Path>,
