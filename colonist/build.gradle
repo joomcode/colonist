@@ -57,3 +57,35 @@ nexusPublishing {
     }
   }
 }
+
+apply plugin: 'kotlin'
+
+sourceSets {
+  functionalTest {
+    java {
+      compileClasspath += main.output
+      runtimeClasspath += main.output
+    }
+  }
+}
+
+dependencies {
+  functionalTestImplementation gradleTestKit()
+  functionalTestImplementation "junit:junit:$junitVersion"
+}
+
+tasks.register("functionalTest", Test.class) {
+  description = "Runs functional tests."
+  group = "verification"
+
+  testClassesDirs = project.sourceSets.functionalTest.output.classesDirs
+  classpath = project.sourceSets.functionalTest.runtimeClasspath
+}
+
+afterEvaluate {
+  tasks.named("functionalTest") {
+    subprojects.each {
+      dependsOn(it.tasks.named("publishToMavenLocal"))
+    }
+  }
+}
