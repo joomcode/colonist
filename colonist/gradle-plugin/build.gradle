@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask
+
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'idea'
@@ -19,31 +22,37 @@ dependencies {
 def generatedDir = new File(projectDir, "generated")
 def generatedJavaSourcesDir = new File(generatedDir, "main/java")
 
-task generateBuildClass {
+def generateBuildClassTask = tasks.register("generateBuildClass") {
   inputs.property('version', version)
-  outputs.dir generatedDir
+  outputs.dir generatedJavaSourcesDir
 
   doLast {
     def buildClassFile = new File(generatedJavaSourcesDir, "com/joom/colonist/plugin/Build.java")
     buildClassFile.parentFile.mkdirs()
     buildClassFile.text = "" +
-      "package com.joom.colonist.plugin;\n" +
-      "\n" +
-      "public class Build {\n" +
-      "    public static final String VERSION = \"$version\";\n" +
-      "}\n"
+        "package com.joom.colonist.plugin;\n" +
+        "\n" +
+        "public class Build {\n" +
+        "    public static final String VERSION = \"$version\";\n" +
+        "}\n"
   }
 }
 
 sourceSets {
   main {
-    output.dir(builtBy: tasks.generateBuildClass, generatedJavaSourcesDir)
     java.srcDirs += generatedJavaSourcesDir
+    kotlin.srcDirs += generatedJavaSourcesDir
   }
 }
 
-tasks.matching { it instanceof AbstractCompile }.forEach {
-  it.dependsOn tasks.generateBuildClass
+tasks.matching { it instanceof AbstractCompile || it instanceof KotlinCompile || it instanceof BaseKtLintCheckTask }.forEach {
+  it.dependsOn generateBuildClassTask
+}
+
+project.afterEvaluate {
+  tasks.named(sourceSets.main.getSourcesJarTaskName()).configure {
+    it.dependsOn generateBuildClassTask
+  }
 }
 
 clean.doFirst {
