@@ -45,11 +45,7 @@ allprojects {
 
   gradle.projectsEvaluated {
     tasks.withType(KotlinCompile).configureEach {
-      compilerOptions {
-        jvmTarget.set(JvmTarget["Companion"].fromTarget(javaVersion.toString()))
-        apiVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
-        languageVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
-      }
+      setCompilerOptions(it)
     }
   }
 }
@@ -92,5 +88,17 @@ afterEvaluate {
     subprojects.each {
       dependsOn(it.tasks.named("publishToMavenLocal"))
     }
+  }
+}
+
+tasks.withType(KotlinCompile).configureEach {
+  setCompilerOptions(it)
+}
+
+def setCompilerOptions(KotlinCompile task) {
+  task.compilerOptions {
+    jvmTarget.set(JvmTarget["Companion"].fromTarget(javaVersion.toString()))
+    apiVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
+    languageVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
   }
 }
