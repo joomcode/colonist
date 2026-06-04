@@ -17,6 +17,6 @@
 package com.joom.colonist.plugin
 
 internal enum class GradleDistribution(val url: String) {
-  GRADLE_7_5("https://services.gradle.org/distributions/gradle-7.5-all.zip"),
-  GRADLE_8_0("https://services.gradle.org/distributions/gradle-8.0-all.zip"),
+  GRADLE_8_14("https://services.gradle.org/distributions/gradle-8.14.5-all.zip"),
+  GRADLE_9_5("https://services.gradle.org/distributions/gradle-9.5.1-all.zip"),
 }

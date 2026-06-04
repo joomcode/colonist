@@ -1,7 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 buildscript {
   apply from: '../versions.gradle'
 
@@ -9,18 +5,19 @@ buildscript {
     mavenLocal()
     google()
     mavenCentral()
+    gradlePluginPortal()
   }
 
   dependencies {
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     classpath "com.android.tools.build:gradle:$androidToolsVersion"
-    classpath "io.michaelrocks.pablo:pablo:$pabloVersion"
+    classpath "com.vanniktech:gradle-maven-publish-plugin:$mavenPublishVersion"
+    classpath "com.gradleup.shadow:shadow-gradle-plugin:$shadowVersion"
   }
 }
 
 plugins {
   id "org.jlleitschuh.gradle.ktlint" version "10.2.1"
-  id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
 }
 
 allprojects {
@@ -32,6 +29,7 @@ allprojects {
       mavenLocal()
       google()
       mavenCentral()
+      gradlePluginPortal()
     }
   }
 
@@ -42,24 +40,9 @@ allprojects {
   }
 
   apply plugin: "org.jlleitschuh.gradle.ktlint"
-
-  gradle.projectsEvaluated {
-    tasks.withType(KotlinCompile).configureEach {
-      setCompilerOptions(it)
-    }
-  }
 }
 
-nexusPublishing {
-  repositories {
-    sonatype {
-      nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-      snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-    }
-  }
-}
-
-apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.kotlin.jvm'
 
 sourceSets {
   functionalTest {
@@ -91,14 +74,18 @@ afterEvaluate {
   }
 }
 
-tasks.withType(KotlinCompile).configureEach {
-  setCompilerOptions(it)
+def pluginTestJavaVersion = JavaVersion.VERSION_17
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(pluginTestJavaVersion.toString())
+    apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+    languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+    allWarningsAsErrors = true
+  }
 }
 
-def setCompilerOptions(KotlinCompile task) {
-  task.compilerOptions {
-    jvmTarget.set(JvmTarget["Companion"].fromTarget(javaVersion.toString()))
-    apiVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
-    languageVersion.set(KotlinVersion["Companion"].fromVersion(kotlinLanguageVersion))
-  }
+tasks.withType(JavaCompile).configureEach {
+  sourceCompatibility = pluginTestJavaVersion.toString()
+  targetCompatibility = pluginTestJavaVersion.toString()
 }

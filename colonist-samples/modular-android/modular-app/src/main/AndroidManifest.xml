@@ -24,6 +24,7 @@
 
     <activity
       android:name="com.joom.colonist.modular.MainActivity"
+      android:exported="true"
       android:label="@string/app_name">
 
       <intent-filter>

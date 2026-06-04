@@ -2,20 +2,24 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.joom.colonist'
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
 
-mainClassName = 'com.joom.colonist.modular.ColonistSample'
+application {
+  mainClass = 'com.joom.colonist.modular.ColonistSample'
+}
 
 dependencies {
   testImplementation "junit:junit:$junitVersion"
 }
 
-jar {
+tasks.named('jar', Jar).configure {
   destinationDirectory.set(file('build/jar'))
 
   from {
-    configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
 }
 

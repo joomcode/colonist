@@ -1,28 +1,63 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
-apply plugin: 'idea'
-apply from: "$rootDir/pablo.gradle"
+evaluationDependsOn(':processor')
 
-targetCompatibility = javaVersion
-sourceCompatibility = javaVersion
+apply plugin: 'java-library'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'idea'
+apply plugin: 'com.gradleup.shadow'
+apply from: "$rootDir/publish.gradle"
+apply from: "$rootDir/shadow-publish.gradle"
+
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+    languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+  }
+}
+
+mavenPublishing {
+  coordinates(project.group.toString(), 'colonist-gradle-plugin', project.version.toString())
+}
+
+shadow {
+  addShadowVariantIntoJavaComponent = false
+}
 
 dependencies {
-  relocate project(':processor')
-
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib$kotlinRuntimeVariant:$kotlinVersion"
 
   compileOnly gradleApi()
   compileOnly "com.android.tools.build:gradle:$androidToolsVersion"
   compileOnly "com.android.tools.build:gradle-api:$androidToolsVersion"
 }
 
+afterEvaluate {
+  def processorProject = project(':processor')
+  def processorJar = processorProject.tasks.named('jar')
+  def processorShadowJar = processorProject.tasks.named('shadowJar')
+
+  tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configure {
+    dependsOn(processorShadowJar, processorJar)
+    configurations = [project.configurations.runtimeClasspath]
+    dependencies {
+      exclude(project(':processor'))
+    }
+    from(processorShadowJar.flatMap { it.archiveFile }.map { zipTree(it) })
+  }
+}
+
 def generatedDir = new File(projectDir, "generated")
 def generatedJavaSourcesDir = new File(generatedDir, "main/java")
 
-def generateBuildClassTask = tasks.register("generateBuildClass") {
+def generateBuildClassTask = tasks.register('generateBuildClass') {
   inputs.property('version', version)
   outputs.dir generatedJavaSourcesDir
 
@@ -45,13 +80,30 @@ sourceSets {
   }
 }
 
-tasks.matching { it instanceof AbstractCompile || it instanceof KotlinCompile || it instanceof BaseKtLintCheckTask }.forEach {
-  it.dependsOn generateBuildClassTask
+def processorCompileClasses = {
+  def processor = project(':processor')
+  [processor, processor.layout.buildDirectory.dir('classes/kotlin/main'), processor.tasks.named('classes')]
+}
+
+tasks.named('compileKotlin', KotlinCompile).configure { compileTask ->
+  def (processor, processorClasses, processorClassesTask) = processorCompileClasses()
+  compileTask.dependsOn(processorClassesTask)
+  compileTask.libraries.from(processorClasses)
+}
+
+tasks.named('compileJava').configure { compileTask ->
+  def (processor, processorClasses, processorClassesTask) = processorCompileClasses()
+  compileTask.dependsOn(processorClassesTask)
+  compileTask.classpath += processor.files(processorClasses)
+}
+
+tasks.matching { it instanceof AbstractCompile || it instanceof KotlinCompile || it instanceof BaseKtLintCheckTask }.configureEach {
+  dependsOn generateBuildClassTask
 }
 
 project.afterEvaluate {
   tasks.named(sourceSets.main.getSourcesJarTaskName()).configure {
-    it.dependsOn generateBuildClassTask
+    dependsOn generateBuildClassTask
   }
 }
 
@@ -62,13 +114,5 @@ clean.doFirst {
 idea {
   module {
     generatedSourceDirs += generatedJavaSourcesDir
-  }
-}
-
-pablo {
-  artifactName = "colonist-gradle-plugin"
-
-  shadow {
-    relocate 'com.joom.colonist'
   }
 }

@@ -5,6 +5,7 @@ buildscript {
     mavenLocal()
     google()
     mavenCentral()
+    gradlePluginPortal()
   }
 
   dependencies {
@@ -27,6 +28,7 @@ allprojects {
       mavenLocal()
       google()
       mavenCentral()
+      gradlePluginPortal()
     }
   }
 
@@ -38,10 +40,16 @@ allprojects {
 
   apply plugin: "org.jlleitschuh.gradle.ktlint"
 
+  tasks.withType(Test).configureEach {
+    failOnNoDiscoveredTests = false
+  }
+
   gradle.projectsEvaluated {
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-      kotlinOptions {
-        jvmTarget = "1.8"
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+      compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
         allWarningsAsErrors = true
       }
     }

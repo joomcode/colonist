@@ -23,9 +23,10 @@ import com.joom.colonist.processor.descriptors.MethodDescriptor
 import com.joom.grip.mirrors.ClassMirror
 import com.joom.grip.mirrors.FieldMirror
 import com.joom.grip.mirrors.MethodMirror
-import kotlinx.metadata.Flag
-import kotlinx.metadata.jvm.KotlinClassMetadata
-import kotlinx.metadata.jvm.Metadata
+import kotlin.metadata.ClassKind
+import kotlin.metadata.jvm.KotlinClassMetadata
+import kotlin.metadata.jvm.Metadata
+import kotlin.metadata.kind
 
 fun MethodMirror.toMethodDescriptor(): MethodDescriptor {
   return MethodDescriptor(name, type)
@@ -38,7 +39,7 @@ fun FieldMirror.toFieldDescriptor(): FieldDescriptor {
 fun ClassMirror.isKotlinObject(): Boolean {
   val metadata = annotations[Types.KOTLIN_METADATA_TYPE] ?: return false
 
-  val classMetadata = KotlinClassMetadata.read(
+  val classMetadata = KotlinClassMetadata.readStrict(
     Metadata(
       kind = metadata.optionalValue("k"),
       metadataVersion = metadata.requireValue("mv"),
@@ -50,9 +51,6 @@ fun ClassMirror.isKotlinObject(): Boolean {
     )
   )
 
-  return if (classMetadata is KotlinClassMetadata.Class) {
-    Flag.Class.IS_OBJECT(classMetadata.toKmClass().flags)
-  } else {
-    false
-  }
+  return classMetadata is KotlinClassMetadata.Class &&
+    classMetadata.kmClass.kind == ClassKind.OBJECT
 }

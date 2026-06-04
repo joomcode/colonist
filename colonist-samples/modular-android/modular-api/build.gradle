@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-  compileSdkVersion androidCompileSdkVersion
-  buildToolsVersion androidBuildToolsVersion
+  namespace 'com.joom.colonist.modular.api'
+  compileSdk androidCompileSdkVersion
 
   defaultConfig {
     minSdkVersion androidMinSdkVersion
@@ -13,9 +13,20 @@ android {
 
     testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
   }
+
+  compileOptions {
+    sourceCompatibility javaVersion
+    targetCompatibility javaVersion
+  }
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+  }
 }
 
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib$kotlinRuntimeVariant:$kotlinVersion"
   implementation "com.joom.colonist:colonist-core:$version"
 }

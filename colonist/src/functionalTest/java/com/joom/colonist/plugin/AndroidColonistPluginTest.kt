@@ -41,9 +41,9 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
     @JvmStatic
     fun parameters(): List<TestCase> {
       return listOf(
-        TestCase(agpVersion = "7.0.4", GradleDistribution.GRADLE_7_5, expectedTaskName = ":transformClassesWithColonistForDebug"),
-        TestCase(agpVersion = "7.2.0", GradleDistribution.GRADLE_7_5, expectedTaskName = ":colonistTransformClassesDebug"),
-        TestCase(agpVersion = "8.1.2", GradleDistribution.GRADLE_8_0, expectedTaskName = ":colonistTransformClassesDebug"),
+        TestCase(agpVersion = "7.4.2", GradleDistribution.GRADLE_8_14, expectedTaskName = ":colonistTransformClassesDebug"),
+        TestCase(agpVersion = "8.1.2", GradleDistribution.GRADLE_8_14, expectedTaskName = ":colonistTransformClassesDebug"),
+        TestCase(agpVersion = "8.12.0", GradleDistribution.GRADLE_9_5, expectedTaskName = ":colonistTransformClassesDebug"),
       )
     }
 
@@ -100,7 +100,7 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
   }
 
   @Language("gradle")
-  private fun createBuildGradle(agpVersion: String, compileSdk: Int = 31, buildToolsVersion: String = "30.0.3"): String {
+  private fun createBuildGradle(agpVersion: String, compileSdk: Int = 31): String {
     return """
       buildscript {
         repositories {
@@ -125,7 +125,7 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
 
       android {
         compileSdk $compileSdk
-        buildToolsVersion "$buildToolsVersion"
+        buildToolsVersion "34.0.0"
 
         defaultConfig {
           applicationId "com.joom.colonist.test"

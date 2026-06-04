@@ -2,10 +2,14 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'com.joom.colonist'
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
 
-mainClassName = 'com.joom.colonist.modular.ColonistSample'
+application {
+  mainClass = 'com.joom.colonist.modular.ColonistSample'
+}
 
 dependencies {
   implementation project(":colonist-samples:modular-java:modular-colony")

@@ -1,13 +1,11 @@
 apply plugin: 'java-library'
-apply from: "$rootDir/pablo.gradle"
+apply from: "$rootDir/publish.gradle"
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
-
-jar {
-  destinationDirectory.set(file('build/jar'))
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
 }
 
-pablo {
-  artifactName = "colonist-annotations"
+mavenPublishing {
+  coordinates(project.group.toString(), 'colonist-annotations', project.version.toString())
 }

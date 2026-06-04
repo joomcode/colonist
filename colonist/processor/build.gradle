@@ -1,15 +1,32 @@
 apply plugin: 'java-library'
-apply plugin: 'kotlin'
-apply from: "$rootDir/pablo.gradle"
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'com.gradleup.shadow'
+apply from: "$rootDir/shadow-common.gradle"
+apply from: "$rootDir/publish.gradle"
+apply from: "$rootDir/shadow-publish.gradle"
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+    apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+    languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.fromVersion(kotlinLanguageVersion)
+  }
+}
+
+mavenPublishing {
+  coordinates(project.group.toString(), 'colonist-processor', project.version.toString())
+}
 
 dependencies {
   implementation project(':core')
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib$kotlinRuntimeVariant:$kotlinVersion"
   implementation "ch.qos.logback:logback-classic:$logbackVersion"
-  implementation "org.jetbrains.kotlinx:kotlinx-metadata-jvm:$kotlinMetadata"
+  implementation "org.jetbrains.kotlin:kotlin-metadata-jvm:$kotlinVersion"
 
   relocate "org.ow2.asm:asm:$asmVersion"
   relocate "org.ow2.asm:asm-commons:$asmVersion"
@@ -20,16 +37,12 @@ dependencies {
   testImplementation "io.kotest:kotest-assertions-core:$kotestVersion"
 }
 
-jar {
-  destinationDirectory.set(file('build/jar'))
+shadow {
+  addShadowVariantIntoJavaComponent = false
 }
 
-pablo {
-  artifactName = "colonist-processor"
-
-  shadow {
-    relocate 'com.joom.colonist'
-    relocate 'com.joom.grip', 'com.joom.colonist.grip'
-    relocate 'org.objectweb.asm', 'com.joom.colonist.asm'
-  }
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configure {
+  configurations = [project.configurations.runtimeClasspath, project.configurations.relocate]
+  relocate('com.joom.grip', 'com.joom.colonist.grip')
+  relocate('org.objectweb.asm', 'com.joom.colonist.asm')
 }

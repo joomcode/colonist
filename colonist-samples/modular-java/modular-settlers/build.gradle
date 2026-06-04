@@ -1,7 +1,9 @@
 apply plugin: 'java'
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
 
 dependencies {
   implementation project(":colonist-samples:modular-java:modular-colony-api")

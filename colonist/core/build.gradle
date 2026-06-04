@@ -1,8 +1,14 @@
 apply plugin: 'java-library'
-apply from: "$rootDir/pablo.gradle"
+apply from: "$rootDir/publish.gradle"
 
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+java {
+  sourceCompatibility = javaVersion
+  targetCompatibility = javaVersion
+}
+
+mavenPublishing {
+  coordinates(project.group.toString(), 'colonist-core', project.version.toString())
+}
 
 dependencies {
   api project(":annotations")
@@ -10,12 +16,4 @@ dependencies {
 
   testImplementation "junit:junit:$junitVersion"
   testImplementation "com.google.code.findbugs:jsr305:$jsr305Version"
-}
-
-jar {
-  destinationDirectory.set(file('build/jar'))
-}
-
-pablo {
-  artifactName = "colonist-core"
 }

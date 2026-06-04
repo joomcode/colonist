@@ -1,12 +1,16 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.joom.colonist.android'
 
 def enabledFeatures = project.properties['enabledFeatures']?.toString() ?: ''
 
 android {
-  compileSdkVersion androidCompileSdkVersion
-  buildToolsVersion androidBuildToolsVersion
+  namespace 'com.joom.colonist.modular'
+  compileSdk androidCompileSdkVersion
+
+  buildFeatures {
+    buildConfig = true
+  }
 
   defaultConfig {
     applicationId 'com.joom.colonist.modular'
@@ -25,10 +29,21 @@ android {
       returnDefaultValues true
     }
   }
+
+  compileOptions {
+    sourceCompatibility javaVersion
+    targetCompatibility javaVersion
+  }
 }
 
 colonist {
   processTest = true
+}
+
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+  }
 }
 
 dependencies {
@@ -37,7 +52,7 @@ dependencies {
     implementation project(":colonist-samples:modular-android:modular-$feature")
   }
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib$kotlinRuntimeVariant:$kotlinVersion"
 
   testImplementation "junit:junit:$junitVersion"
 

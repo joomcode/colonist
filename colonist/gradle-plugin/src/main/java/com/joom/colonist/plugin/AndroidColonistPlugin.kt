@@ -48,12 +48,6 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
         configureTransformWithArtifactsApi(ScopedArtifactsRegistrar)
       }
 
-      componentsExtension != null && componentsExtension.pluginVersion >= ALL_CLASSES_TRANSFORM_API_VERSION -> {
-        logger.info("Registering colonist with all classes transform API")
-
-        configureTransformWithArtifactsApi(AllClassesTransformRegistrar)
-      }
-
       else -> {
         logger.info("Registering colonist with transform API")
 
@@ -167,6 +161,5 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
 
   private companion object {
     private val SCOPED_ARTIFACTS_VERSION = AndroidPluginVersion(major = 7, minor = 4, micro = 0)
-    private val ALL_CLASSES_TRANSFORM_API_VERSION = AndroidPluginVersion(major = 7, minor = 1, micro = 0)
   }
 }

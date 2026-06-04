@@ -1,18 +1,19 @@
 ext.COLONIST_GROUP = "com.joom.colonist"
-ext.COLONIST_VERSION = "0.1.0-alpha22"
+ext.COLONIST_VERSION = "0.1.0-alpha23"
 
 ext {
   javaVersion = JavaVersion.VERSION_11
-  kotlinLanguageVersion = '1.7'
-  kotlinVersion = '1.8.10'
-  pabloVersion = '1.3.1'
+  kotlinLanguageVersion = '2.2'
+  kotlinVersion = '2.4.0'
+  kotlinRuntimeVariant = ''
+  mavenPublishVersion = '0.36.0'
+  shadowVersion = '9.1.0'
 
   jsr305Version = '3.0.2'
-  asmVersion = '9.2'
-  gripVersion = '0.9.0'
+  asmVersion = '9.7'
+  gripVersion = '0.11.0'
   logbackVersion = '1.2.11'
   kotestVersion = '5.3.0'
-  kotlinMetadata = '0.6.0'
 
   junitVersion = '4.13.2'
   androidxEspressoVersion = '3.4.0'
@@ -20,11 +21,11 @@ ext {
   androidxTestRunnerVersion = '1.4.0'
   androidxTestExtJunitVersion = '1.1.3'
 
-  androidCompileSdkVersion = 30
-  androidTargetSdkVersion = 30
+  androidCompileSdkVersion = 34
+  androidTargetSdkVersion = 34
   androidMinSdkVersion = 16
-  androidBuildToolsVersion = '30.0.3'
-  androidToolsVersion = '7.4.2'
+  androidBuildToolsVersion = '34.0.0'
+  androidToolsVersion = '8.12.0'
 
   androidxAnnotationVersion = '1.2.0'
 }
