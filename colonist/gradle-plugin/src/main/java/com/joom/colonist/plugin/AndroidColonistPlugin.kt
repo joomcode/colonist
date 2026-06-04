@@ -17,10 +17,12 @@
 package com.joom.colonist.plugin
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.artifact.ScopedArtifact
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Component
 import com.android.build.api.variant.HasAndroidTest
+import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AppExtension
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -37,75 +39,116 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
     }
 
+    val androidComponents = project.androidComponents
+      ?: throw GradleException(
+        "Colonist Android plugin requires Android Gradle Plugin $MIN_AGP_VERSION or newer " +
+          "(androidComponents extension is missing)"
+      )
+
+    if (androidComponents.pluginVersion < MIN_AGP_VERSION) {
+      throw GradleException(
+        "Colonist Android plugin requires Android Gradle Plugin $MIN_AGP_VERSION or newer, " +
+          "but ${androidComponents.pluginVersion} is used"
+      )
+    }
+
     addDependencies(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)
 
-    val componentsExtension = project.androidComponents
-
-    when {
-      componentsExtension != null && componentsExtension.pluginVersion >= SCOPED_ARTIFACTS_VERSION -> {
-        logger.info("Registering colonist with scoped artifacts API")
-
-        configureTransformWithArtifactsApi(ScopedArtifactsRegistrar)
-      }
-
-      else -> {
-        logger.info("Registering colonist with transform API")
-
-        configureTransform()
-      }
-    }
-  }
-
-  private fun configureTransformWithArtifactsApi(registrar: TransformTaskRegistrar) {
     val extension = project.extensions.create("colonist", AndroidVariantColonistExtension::class.java)
 
-    project.applicationAndroidComponents?.apply {
-      onVariants(selector().all()) { variant ->
-        variant.registerColonistTask(registrar, discoverSettlers = true, processTest = extension.processTest)
-      }
-    }
+    configureVariants(
+      components = project.applicationAndroidComponents,
+      extension = extension,
+      discoverSettlers = true,
+    )
 
-    project.libraryAndroidComponents?.apply {
-      onVariants(selector().all()) { variant ->
-        variant.registerColonistTask(registrar, discoverSettlers = false, processTest = extension.processTest)
-      }
+    configureVariants(
+      components = project.libraryAndroidComponents,
+      extension = extension,
+      discoverSettlers = false,
+    )
+  }
+
+  private fun configureVariants(
+    components: AndroidComponentsExtension<*, *, *>?,
+    extension: AndroidVariantColonistExtension,
+    discoverSettlers: Boolean,
+  ) {
+    components?.onVariants(components.selector().all()) { variant ->
+      variant.registerColonistTasks(
+        extension = extension,
+        discoverSettlers = discoverSettlers,
+      )
     }
   }
 
-  private fun <T> T.registerColonistTask(
-    registrar: TransformTaskRegistrar,
+  private fun Variant.registerColonistTasks(
+    extension: AndroidVariantColonistExtension,
     discoverSettlers: Boolean,
-    processTest: Boolean
-  ) where T : Variant, T : HasAndroidTest {
+  ) {
     val runtimeClasspath = runtimeClasspathConfiguration()
 
     registerColonistTask(
-      registrar = registrar,
       discoverSettlers = discoverSettlers,
       classpathProvider = classpathProvider(runtimeClasspath),
       discoveryClasspathProvider = discoveryClasspathProvider(runtimeClasspath),
+      cacheable = extension.cacheable,
     )
 
-    androidTest?.let { androidTest ->
-      val androidTestRuntimeClasspath = androidTest.runtimeClasspathConfiguration()
-
-      androidTest.registerColonistTask(
-        registrar = registrar,
+    if (this is HasAndroidTest) {
+      val androidTestComponent = androidTest ?: return
+      androidTestComponent.registerColonistTask(
         discoverSettlers = discoverSettlers,
-        classpathProvider = classpathProvider(androidTestRuntimeClasspath),
-        discoveryClasspathProvider = discoveryClasspathProvider(androidTestRuntimeClasspath) - discoveryClasspathProvider(runtimeClasspath)
+        classpathProvider = classpathProvider(androidTestComponent.runtimeClasspathConfiguration()),
+        discoveryClasspathProvider = discoveryClasspathProvider(androidTestComponent.runtimeClasspathConfiguration()) -
+          discoveryClasspathProvider(runtimeClasspath),
+        cacheable = extension.cacheable,
       )
     }
 
-    unitTest.takeIf { processTest }?.let { unitTest ->
-      val unitTestRuntimeClasspath = unitTest.runtimeClasspathConfiguration()
+    if (extension.processTest) {
+      val unitTestComponent = unitTest ?: return
+      val unitTestRuntimeClasspath = unitTestComponent.runtimeClasspathConfiguration()
 
-      unitTest.registerColonistTask(
-        registrar = registrar,
+      unitTestComponent.registerColonistTask(
         discoverSettlers = discoverSettlers,
         classpathProvider = classpathProvider(runtimeClasspath),
-        discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath)
+        discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath),
+        cacheable = extension.cacheable,
       )
+    }
+  }
+
+  private fun Component.registerColonistTask(
+    discoverSettlers: Boolean,
+    classpathProvider: Provider<FileCollection>,
+    discoveryClasspathProvider: Provider<FileCollection>,
+    cacheable: Boolean,
+  ) {
+    val taskProvider = project.registerTask<ColonistTransformClassesTask>(
+      TASK_PREFIX + name.replaceFirstChar { it.uppercaseChar() }
+    )
+
+    artifacts.forScope(ScopedArtifacts.Scope.PROJECT)
+      .use(taskProvider)
+      .toTransform(
+        ScopedArtifact.CLASSES,
+        ColonistTransformClassesTask::allJars,
+        ColonistTransformClassesTask::allDirectories,
+        ColonistTransformClassesTask::output,
+      )
+
+    taskProvider.configure { task ->
+      task.discoverSettlers = discoverSettlers
+      task.discoveryClasspath.setFrom(discoveryClasspathProvider)
+      task.classpath.setFrom(classpathProvider)
+
+      @Suppress("UnstableApiUsage")
+      task.bootClasspath.from(project.androidComponents!!.sdkComponents.bootClasspath)
+
+      if (!cacheable) {
+        task.outputs.doNotCacheIf("colonist.cacheable is false") { true }
+      }
     }
   }
 
@@ -125,41 +168,8 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     return zip(other) { first, second -> first - second }
   }
 
-  @Suppress("UnstableApiUsage")
-  private fun Component.registerColonistTask(
-    registrar: TransformTaskRegistrar,
-    discoverSettlers: Boolean,
-    classpathProvider: Provider<FileCollection>,
-    discoveryClasspathProvider: Provider<FileCollection>,
-  ) {
-    val taskProvider = project.registerTask<ColonistTransformClassesTask>("colonistTransformClasses${name.replaceFirstChar { it.uppercaseChar() }}")
-    registrar.register(this, taskProvider)
-
-    taskProvider.configure { task ->
-      task.discoverSettlers = discoverSettlers
-      task.discoveryClasspath.setFrom(discoveryClasspathProvider)
-      task.classpath.setFrom(classpathProvider)
-      task.bootClasspath.setFrom(project.android.bootClasspath)
-    }
-  }
-
-  @Suppress("DEPRECATION")
-  private fun configureTransform() {
-    if (project.android !is AppExtension) {
-      return
-    }
-
-    val extension = project.extensions.create("colonist", AndroidColonistExtension::class.java)
-
-    @Suppress("DEPRECATION")
-    project.android.registerTransform(ColonistTransform(extension))
-
-    project.afterEvaluate {
-      extension.bootClasspath = project.android.bootClasspath
-    }
-  }
-
   private companion object {
-    private val SCOPED_ARTIFACTS_VERSION = AndroidPluginVersion(major = 7, minor = 4, micro = 0)
+    private val MIN_AGP_VERSION = AndroidPluginVersion(major = 7, minor = 4, micro = 0)
+    private const val TASK_PREFIX = "colonistTransformClasses"
   }
 }

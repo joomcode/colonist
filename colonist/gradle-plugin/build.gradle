@@ -34,6 +34,7 @@ shadow {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib$kotlinRuntimeVariant:$kotlinVersion"
 
+  compileOnly project(':processor')
   compileOnly gradleApi()
   compileOnly "com.android.tools.build:gradle:$androidToolsVersion"
   compileOnly "com.android.tools.build:gradle-api:$androidToolsVersion"
@@ -78,23 +79,6 @@ sourceSets {
     java.srcDirs += generatedJavaSourcesDir
     kotlin.srcDirs += generatedJavaSourcesDir
   }
-}
-
-def processorCompileClasses = {
-  def processor = project(':processor')
-  [processor, processor.layout.buildDirectory.dir('classes/kotlin/main'), processor.tasks.named('classes')]
-}
-
-tasks.named('compileKotlin', KotlinCompile).configure { compileTask ->
-  def (processor, processorClasses, processorClassesTask) = processorCompileClasses()
-  compileTask.dependsOn(processorClassesTask)
-  compileTask.libraries.from(processorClasses)
-}
-
-tasks.named('compileJava').configure { compileTask ->
-  def (processor, processorClasses, processorClassesTask) = processorCompileClasses()
-  compileTask.dependsOn(processorClassesTask)
-  compileTask.classpath += processor.files(processorClasses)
 }
 
 tasks.matching { it instanceof AbstractCompile || it instanceof KotlinCompile || it instanceof BaseKtLintCheckTask }.configureEach {

@@ -19,24 +19,19 @@ package com.joom.colonist.plugin
 import com.joom.colonist.processor.ColonistOutputFactory
 import com.joom.colonist.processor.ColonistParameters
 import com.joom.colonist.processor.ColonistProcessor
-import java.io.File
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
@@ -44,11 +39,11 @@ import org.gradle.api.tasks.TaskAction
 abstract class ColonistTransformClassesTask : DefaultTask() {
   @get:InputFiles
   @get:Classpath
-  abstract val inputClasses: ListProperty<RegularFile>
+  abstract val allJars: ListProperty<RegularFile>
 
   @get:InputFiles
   @get:Classpath
-  abstract val inputDirectories: ListProperty<Directory>
+  abstract val allDirectories: ListProperty<Directory>
 
   @get:InputFiles
   @get:CompileClasspath
@@ -63,14 +58,9 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
   abstract val bootClasspath: ConfigurableFileCollection
 
   @get:OutputFile
-  @get:Optional
   abstract val output: RegularFileProperty
 
-  @get:OutputDirectory
-  @get:Optional
-  abstract val outputDirectory: DirectoryProperty
-
-  @Input
+  @get:Input
   var discoverSettlers: Boolean = false
 
   init {
@@ -81,11 +71,11 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
   fun process() {
     clean()
 
-    val output = computeOutput().get().toPath()
+    val outputPath = output.asFile.get().toPath()
 
     val parameters = ColonistParameters(
-      inputs = inputClasses.get().map { it.asFile.toPath() } + inputDirectories.get().map { it.asFile.toPath() },
-      outputFactory = ColonistOutputFactory.create(output),
+      inputs = allJars.get().map { it.asFile.toPath() } + allDirectories.get().map { it.asFile.toPath() },
+      outputFactory = ColonistOutputFactory.create(outputPath),
       discoveryClasspath = discoveryClasspath.map { it.toPath() },
       classpath = classpath.map { it.toPath() },
       bootClasspath = bootClasspath.map { it.toPath() },
@@ -100,19 +90,11 @@ abstract class ColonistTransformClassesTask : DefaultTask() {
     }
   }
 
-  private fun computeOutput(): Provider<File> {
-    return when {
-      output.isPresent -> output.asFile
-      outputDirectory.isPresent -> outputDirectory.asFile
-      else -> error("output or outputDirectory is not set")
-    }
-  }
-
   private fun clean() {
-    val output = computeOutput()
+    val outputFile = output.asFile.get()
 
-    if (output.get().exists()) {
-      output.get().deleteRecursively()
+    if (outputFile.exists()) {
+      outputFile.delete()
     }
   }
 }
