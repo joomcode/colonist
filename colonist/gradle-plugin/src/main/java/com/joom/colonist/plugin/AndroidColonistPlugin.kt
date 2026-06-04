@@ -18,9 +18,12 @@ package com.joom.colonist.plugin
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.ScopedArtifact
+import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.Component
 import com.android.build.api.variant.HasAndroidTest
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.api.variant.Variant
 import org.gradle.api.GradleException
@@ -35,20 +38,13 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   override fun apply(project: Project) {
     super.apply(project)
 
-    if (!project.hasAndroid) {
-      throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
-    }
+    val componentsExtension = project.androidComponents
+      ?: throw GradleException("Colonist plugin must be applied *AFTER* Android plugin")
 
-    val androidComponents = project.androidComponents
-      ?: throw GradleException(
-        "Colonist Android plugin requires Android Gradle Plugin $MIN_AGP_VERSION or newer " +
-          "(androidComponents extension is missing)"
-      )
-
-    if (androidComponents.pluginVersion < MIN_AGP_VERSION) {
+    if (componentsExtension.pluginVersion < MIN_AGP_VERSION) {
       throw GradleException(
         "Colonist Android plugin requires Android Gradle Plugin $MIN_AGP_VERSION or newer, " +
-          "but ${androidComponents.pluginVersion} is used"
+          "but ${componentsExtension.pluginVersion} is used"
       )
     }
 
@@ -57,13 +53,13 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     val extension = project.extensions.create("colonist", AndroidVariantColonistExtension::class.java)
 
     configureVariants(
-      components = project.applicationAndroidComponents,
+      components = componentsExtension as? ApplicationAndroidComponentsExtension,
       extension = extension,
       discoverSettlers = true,
     )
 
     configureVariants(
-      components = project.libraryAndroidComponents,
+      components = componentsExtension as? LibraryAndroidComponentsExtension,
       extension = extension,
       discoverSettlers = false,
     )
@@ -78,6 +74,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       variant.registerColonistTasks(
         extension = extension,
         discoverSettlers = discoverSettlers,
+        sdkComponents = components.sdkComponents,
       )
     }
   }
@@ -85,6 +82,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
   private fun Variant.registerColonistTasks(
     extension: AndroidVariantColonistExtension,
     discoverSettlers: Boolean,
+    sdkComponents: SdkComponents,
   ) {
     val runtimeClasspath = runtimeClasspathConfiguration()
 
@@ -92,6 +90,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       discoverSettlers = discoverSettlers,
       classpathProvider = classpathProvider(runtimeClasspath),
       discoveryClasspathProvider = discoveryClasspathProvider(runtimeClasspath),
+      sdkComponents = sdkComponents,
       cacheable = extension.cacheable,
     )
 
@@ -102,6 +101,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
         classpathProvider = classpathProvider(androidTestComponent.runtimeClasspathConfiguration()),
         discoveryClasspathProvider = discoveryClasspathProvider(androidTestComponent.runtimeClasspathConfiguration()) -
           discoveryClasspathProvider(runtimeClasspath),
+        sdkComponents = sdkComponents,
         cacheable = extension.cacheable,
       )
     }
@@ -114,6 +114,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
         discoverSettlers = discoverSettlers,
         classpathProvider = classpathProvider(runtimeClasspath),
         discoveryClasspathProvider = discoveryClasspathProvider(unitTestRuntimeClasspath),
+        sdkComponents = sdkComponents,
         cacheable = extension.cacheable,
       )
     }
@@ -123,6 +124,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
     discoverSettlers: Boolean,
     classpathProvider: Provider<FileCollection>,
     discoveryClasspathProvider: Provider<FileCollection>,
+    sdkComponents: SdkComponents,
     cacheable: Boolean,
   ) {
     val taskProvider = project.registerTask<ColonistTransformClassesTask>(
@@ -144,7 +146,7 @@ class AndroidColonistPlugin : BaseColonistPlugin() {
       task.classpath.setFrom(classpathProvider)
 
       @Suppress("UnstableApiUsage")
-      task.bootClasspath.from(project.androidComponents!!.sdkComponents.bootClasspath)
+      task.bootClasspath.from(sdkComponents.bootClasspath)
 
       if (!cacheable) {
         task.outputs.doNotCacheIf("colonist.cacheable is false") { true }

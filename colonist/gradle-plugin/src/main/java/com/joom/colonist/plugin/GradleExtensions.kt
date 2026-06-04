@@ -17,9 +17,6 @@
 package com.joom.colonist.plugin
 
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.LibraryAndroidComponentsExtension
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -40,16 +37,8 @@ val Project.sourceSets: SourceSetContainer
     return extension.sourceSets
   }
 
-val Project.hasAndroid: Boolean
-  get() = extensions.findByName("android") is BaseExtension
-val Project.android: BaseExtension
-  get() = extensions.getByName("android") as BaseExtension
 val Project.androidComponents: AndroidComponentsExtension<*, *, *>?
-  get() = applicationAndroidComponents ?: libraryAndroidComponents
-val Project.applicationAndroidComponents: ApplicationAndroidComponentsExtension?
-  get() = extensions.findByName("androidComponents") as? ApplicationAndroidComponentsExtension
-val Project.libraryAndroidComponents: LibraryAndroidComponentsExtension?
-  get() = extensions.findByName("androidComponents") as? LibraryAndroidComponentsExtension
+  get() = extensions.findByName("androidComponents") as? AndroidComponentsExtension<*, *, *>
 
 inline fun <reified T : Task> Project.registerTask(name: String): TaskProvider<T> {
   return tasks.register(name, T::class.java)

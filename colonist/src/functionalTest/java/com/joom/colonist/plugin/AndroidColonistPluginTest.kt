@@ -41,9 +41,36 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
     @JvmStatic
     fun parameters(): List<TestCase> {
       return listOf(
-        TestCase(agpVersion = "7.4.2", GradleDistribution.GRADLE_8_14, expectedTaskName = ":colonistTransformClassesDebug"),
-        TestCase(agpVersion = "8.1.2", GradleDistribution.GRADLE_8_14, expectedTaskName = ":colonistTransformClassesDebug"),
-        TestCase(agpVersion = "8.12.0", GradleDistribution.GRADLE_9_5, expectedTaskName = ":colonistTransformClassesDebug"),
+        TestCase(
+          agpVersion = "7.4.2",
+          gradleDistribution = GradleDistribution.GRADLE_8_14,
+          projectType = AndroidProjectType.APPLICATION,
+          expectedTaskName = ":colonistTransformClassesDebug",
+        ),
+        TestCase(
+          agpVersion = "8.1.2",
+          gradleDistribution = GradleDistribution.GRADLE_8_14,
+          projectType = AndroidProjectType.APPLICATION,
+          expectedTaskName = ":colonistTransformClassesDebug",
+        ),
+        TestCase(
+          agpVersion = "8.12.0",
+          gradleDistribution = GradleDistribution.GRADLE_9_5,
+          projectType = AndroidProjectType.APPLICATION,
+          expectedTaskName = ":colonistTransformClassesDebug",
+        ),
+        TestCase(
+          agpVersion = "9.2.1",
+          gradleDistribution = GradleDistribution.GRADLE_9_5,
+          projectType = AndroidProjectType.APPLICATION,
+          expectedTaskName = ":colonistTransformClassesDebug",
+        ),
+        TestCase(
+          agpVersion = "9.2.1",
+          gradleDistribution = GradleDistribution.GRADLE_9_5,
+          projectType = AndroidProjectType.LIBRARY,
+          expectedTaskName = ":colonistTransformClassesDebug",
+        ),
       )
     }
 
@@ -56,7 +83,10 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
 
   @Test
   fun test() {
-    val projectRoot = createProjectDirectory(agpVersion = case.agpVersion)
+    val projectRoot = createProjectDirectory(
+      agpVersion = case.agpVersion,
+      projectType = case.projectType,
+    )
 
     val result = createGradleRunner(projectRoot, case.gradleDistribution).build()
 
@@ -64,9 +94,9 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
     Assert.assertTrue(tasks.any { it.path == case.expectedTaskName })
   }
 
-  private fun createProjectDirectory(agpVersion: String): File {
+  private fun createProjectDirectory(agpVersion: String, projectType: AndroidProjectType): File {
     val projectRoot = temporaryFolder.newFolder()
-    writeText(createBuildGradle(agpVersion), File(projectRoot, "build.gradle"))
+    writeText(createBuildGradle(agpVersion, projectType), File(projectRoot, "build.gradle"))
     writeText(ANDROID_MANIFEST, File(projectRoot, "src/main/AndroidManifest.xml"))
     return projectRoot
   }
@@ -100,7 +130,11 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
   }
 
   @Language("gradle")
-  private fun createBuildGradle(agpVersion: String, compileSdk: Int = 31): String {
+  private fun createBuildGradle(
+    agpVersion: String,
+    projectType: AndroidProjectType,
+    compileSdk: Int = 31,
+  ): String {
     return """
       buildscript {
         repositories {
@@ -115,7 +149,7 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
         }
       }
 
-      apply plugin: "com.android.application"
+      apply plugin: "${projectType.pluginId}"
       apply plugin: "com.joom.colonist.android"
 
       repositories {
@@ -127,12 +161,9 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
         compileSdk $compileSdk
         buildToolsVersion "34.0.0"
 
-        defaultConfig {
-          applicationId "com.joom.colonist.test"
-          namespace "com.joom.colonist.test"
-          versionCode 1
-          versionName "1"
-        }
+        namespace "com.joom.colonist.test"
+
+        ${projectType.defaultConfig}
       }
     """.trimIndent()
   }
@@ -154,5 +185,26 @@ internal class AndroidColonistPluginTest(private val case: TestCase) {
 internal data class TestCase(
   val agpVersion: String,
   val gradleDistribution: GradleDistribution,
+  val projectType: AndroidProjectType,
   val expectedTaskName: String
 )
+
+internal enum class AndroidProjectType(
+  val pluginId: String,
+  val defaultConfig: String,
+) {
+  APPLICATION(
+    pluginId = "com.android.application",
+    defaultConfig = """
+      defaultConfig {
+        applicationId "com.joom.colonist.test"
+        versionCode 1
+        versionName "1"
+      }
+    """.trimIndent(),
+  ),
+  LIBRARY(
+    pluginId = "com.android.library",
+    defaultConfig = "",
+  ),
+}
